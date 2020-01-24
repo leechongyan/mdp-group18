@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/icon1"
+        android:icon="@drawable/ic_bluetooth_24dp"
+        android:title=""/>
+
+    <item
+        android:id="@+id/icon2"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title=""/>
+
+    <item
+        android:id="@+id/icon3"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title=""/>
+
+    <item
+        android:id="@+id/icon4"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title=""/>
+
+</menu>
