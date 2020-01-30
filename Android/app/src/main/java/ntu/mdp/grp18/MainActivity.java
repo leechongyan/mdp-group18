@@ -15,26 +15,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                Fragment selectedFragment;
-
-                switch (menuItem.getItemId()){
-                    case R.id.icon1:
-                        selectedFragment = new BluetoothFragment();
-                        break;
-                    default:
-                        //TODO:Complete the switch statement
-                        selectedFragment = new BluetoothFragment();
-                }
-
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
-
-                return true;
-            }
-        });
+//        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+//        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+//            @Override
+//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+//                Fragment selectedFragment;
+//
+//                switch (menuItem.getItemId()){
+//                    case R.id.icon1:
+//                        selectedFragment = new BluetoothFragment();
+//                        break;
+//                    default:
+//                        //TODO:Complete the switch statement
+//                        selectedFragment = new BluetoothFragment();
+//                }
+//
+//                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+//
+//                return true;
+//            }
+//        });
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
 
