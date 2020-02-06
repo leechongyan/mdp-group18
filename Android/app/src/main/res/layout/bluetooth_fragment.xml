@@ -1,170 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/colorPrimary"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp">
+        android:layout_height="match_parent">
 
-        <Switch
-            android:id="@+id/switch1"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginEnd="28dp"
-            android:text="BLUETOOTH"
-            android:textSize="20sp"
-            android:textColor="#ffffff"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/colorPrimaryDark">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="30dp"
-                android:text="EQUIPMENT NAME"
-                android:textSize="20sp"
-                android:textColor="#ffffff"
-                android:textAlignment="gravity"
-                android:gravity="center"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="30dp"
-                android:text="grp18 tablet"
-                android:textSize="20sp"
-                android:textColor="#ffffff"
-                android:textAlignment="gravity"
-                android:gravity="center"
-                android:layout_alignParentEnd="true"/>
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:layout_marginTop="15dp"
-        android:orientation="vertical"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginStart="30dp"
-            android:text="PAIRED DEVICE"
-            android:textColor="#ffffff"
-            android:textSize="20sp"
-            android:textAlignment="gravity"
-            android:gravity="center"/>
-
-        <include layout="@layout/device_element"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:background="@color/colorPrimary"
-        android:orientation="vertical"
-        android:paddingBottom="15dp"
-        android:paddingTop="5dp"
-        android:focusableInTouchMode="true">
-
-        <TextView
-            android:id="@+id/testing_text"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginStart="30dp"
-            android:text="TESTING"
-            android:textColor="#ffffff"
-            android:textSize="20sp"
-            android:textAlignment="gravity"
-            android:gravity="center"/>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="54dp">
-
-            <EditText
-                android:id="@+id/testing_edittext"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginStart="30dp"
-                android:layout_marginEnd="180dp"
-                android:background="#ffffff"
-                android:inputType="text"
-                android:layout_centerVertical="true"
-                android:textSize="20sp"/>
-
-            <ImageButton
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_send"
-                android:background="#00000000"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="30dp"
-                android:layout_centerVertical="true"/>
+                android:orientation="vertical"
+                android:background="@color/colorPrimary"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:focusableInTouchMode="true">
 
-        </RelativeLayout>
+                <Switch
+                    android:id="@+id/bluetooth_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginEnd="28dp"
+                    android:text="BLUETOOTH"
+                    android:textSize="20sp"
+                    android:textColor="#ffffff"
+                    android:layout_gravity="center_horizontal"/>
 
-    </LinearLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:background="@color/colorPrimary"
-        android:orientation="vertical"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="30dp"
+                        android:text="DEVICE NAME"
+                        android:textSize="20sp"
+                        android:textColor="#ffffff"
+                        android:textAlignment="gravity"
+                        android:gravity="center"/>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
+                    <EditText
+                        android:id="@+id/device_name_edittext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="30dp"
+                        android:text="grp18 tablet"
+                        android:textSize="20sp"
+                        android:textColor="#ffffff"
+                        android:textAlignment="gravity"
+                        android:gravity="center"
+                        android:inputType="text"
+                        android:layout_alignParentEnd="true"
+                        android:imeOptions="actionDone"/>
 
-            <TextView
-                android:id="@+id/available_devices"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_marginStart="30dp"
-                android:text="AVAILABLE DEVICES"
-                android:textColor="#ffffff"
-                android:textSize="20sp"
-                android:textAlignment="gravity"
-                android:gravity="center"/>
+                </RelativeLayout>
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="30dp"
-                android:src="@drawable/ic_refresh"
-                android:background="#00000000"/>
+            </LinearLayout>
 
-        </RelativeLayout>
+            <LinearLayout
+                android:id="@+id/paired_device_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:layout_marginTop="15dp"
+                android:orientation="vertical"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp">
 
-        <include layout="@layout/device_element"/>
-        <include layout="@layout/device_element"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:text="PAIRED DEVICE"
+                    android:textColor="#ffffff"
+                    android:textSize="20sp"
+                    android:textAlignment="gravity"
+                    android:gravity="center"/>
 
-    </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/paired_device_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
+                    <include layout="@layout/device_element"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bluetooth_testing_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@color/colorPrimary"
+                android:orientation="vertical"
+                android:paddingBottom="15dp"
+                android:paddingTop="5dp"
+                android:focusableInTouchMode="true">
+
+                <TextView
+                    android:id="@+id/testing_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:text="TESTING"
+                    android:textColor="#ffffff"
+                    android:textSize="20sp"
+                    android:textAlignment="gravity"
+                    android:gravity="center"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp">
+
+                    <EditText
+                        android:id="@+id/testing_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginEnd="180dp"
+                        android:background="#ffffff"
+                        android:inputType="text"
+                        android:textSize="20sp"
+                        android:imeOptions="actionDone"/>
+
+                    <ImageButton
+                        android:id="@+id/bluetooth_testing_send_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_send"
+                        android:background="#00000000"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="30dp"
+                        android:layout_centerVertical="true"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/available_devices_section"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="15dp"
+                android:background="@color/colorPrimary"
+                android:orientation="vertical"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="30dp"
+                        android:text="AVAILABLE DEVICES"
+                        android:textColor="#ffffff"
+                        android:textSize="20sp"
+                        android:textAlignment="gravity"
+                        android:gravity="center"/>
+
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="30dp"
+                        android:src="@drawable/ic_refresh"
+                        android:background="#00000000"/>
+
+                </RelativeLayout>
+
+                <include
+                    android:id="@+id/available_device_test"
+                    layout="@layout/device_element"/>
+                <include layout="@layout/device_element"/>
+                <include layout="@layout/device_element"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

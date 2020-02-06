@@ -13,11 +13,12 @@
         android:src="@drawable/ic_laptop_black_24dp"/>
 
     <TextView
+        android:id="@+id/device_element_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginStart="30dp"
         android:layout_toEndOf="@+id/equipment_type"
-        android:text="name of paired device"
+        android:text="name of device"
         android:textSize="20sp"
         android:textAlignment="gravity"
         android:gravity="center"
