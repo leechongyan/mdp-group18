@@ -112,13 +112,7 @@ public class BluetoothFragment extends Fragment {
             //if there's no device paired with out tablet at the moment, try connect to the device we connected to last time
             //Todo: [BE] retrieve the paired device name from "shared preference" if there is one
             if(pairedDeviceName != ""){
-                boolean isConnected = false;
-                //Todo: [BT] try to connect to the device with the name pairedDeviceName && indicate the outcome
-                //Todo: [BT] This probably needs to be done with a callback function. If that is the case, use "onDeviceConnected" as the callback, and call it when connection is successfully set up
-                if(isConnected) {
-                    //Todo: [FE] including pairedDeviceType
-                    onDeviceConnected(view, pairedDeviceName);
-                }
+                //Todo: [BT] try to connect to the device with the name pairedDeviceName
             }
         }
 
@@ -271,6 +265,12 @@ public class BluetoothFragment extends Fragment {
                 onDeviceConnected(fragment, "test");
             }
         });
+    }
+
+    public boolean isBluetoothConnected(){
+        //Todo: [BT] return a boolean showing whether bluetooth is current connected or not
+        //test
+        return false;
     }
 
 }
