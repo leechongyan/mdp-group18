@@ -80,22 +80,50 @@
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_marginStart="30dp"
-                    android:text="PAIRED DEVICE"
-                    android:textColor="#ffffff"
-                    android:textSize="20sp"
-                    android:textAlignment="gravity"
-                    android:gravity="center"/>
+                    android:id="@+id/paireddevicetext">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="30dp"
+                        android:text="PAIRED DEVICE"
+                        android:textColor="#ffffff"
+                        android:textSize="20sp"
+                        android:textAlignment="gravity"
+                        android:gravity="center"/>
+
+                    <Button
+                        android:id="@+id/connectBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="30dp"
+                        android:text="CONNECT"
+                        android:layout_alignParentEnd="true"
+                        />
+
+                </RelativeLayout>
 
                 <LinearLayout
                     android:id="@+id/paired_device_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="150dp">
 
-                    <include layout="@layout/device_element"/>
+                    <ListView
+                        android:id="@+id/pairedDevicesListView"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:listSelector="#bdb9b9"
+                        android:gravity="bottom"
+                        android:scrollbars="vertical"
+                        android:text=""
+                        android:textSize="14sp"
+                        android:layout_below="@+id/pairedDevicesTitleTextView" />
 
                 </LinearLayout>
 
@@ -150,6 +178,17 @@
 
                 </RelativeLayout>
 
+                <TextView
+                    android:id="@+id/testing_returntext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="30dp"
+                    android:text=""
+                    android:textColor="#ffffff"
+                    android:textSize="20sp"
+                    android:textAlignment="gravity"
+                    />
+
             </LinearLayout>
 
             <LinearLayout
@@ -164,7 +203,8 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp">
+                    android:layout_height="50dp"
+                    android:id="@+id/available_device_text">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -177,20 +217,39 @@
                         android:gravity="center"/>
 
                     <ImageButton
+                        android:id="@+id/toggleButtonScan"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_marginEnd="30dp"
                         android:src="@drawable/ic_refresh"
-                        android:background="#00000000"/>
+                        android:background="#00000000" />
 
                 </RelativeLayout>
 
-                <include
-                    android:id="@+id/available_device_test"
-                    layout="@layout/device_element"/>
-                <include layout="@layout/device_element"/>
-                <include layout="@layout/device_element"/>
+                <LinearLayout
+                    android:id="@+id/other_device_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp">
+
+                    <ListView
+                        android:id="@+id/otherDevicesListView"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:gravity="bottom"
+                        android:scrollbars="vertical"
+                        android:text=""
+                        android:textSize="14sp"
+                        android:layout_below="@+id/available_device_text" />
+
+                </LinearLayout>
+
+                <!--<include-->
+                <!--android:id="@+id/available_device_test"-->
+                <!--layout="@layout/device_element"/>-->
 
             </LinearLayout>
 

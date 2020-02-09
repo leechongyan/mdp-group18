@@ -33,40 +33,41 @@
 
     </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/colorPrimaryDark">
+    <!--comment out first (@Jason)-->
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="80dp"-->
+        <!--android:background="@color/colorPrimaryDark">-->
 
-        <ImageButton
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
-            android:background="#00000000"/>
+        <!--<ImageButton-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:src="@drawable/ic_bluetooth_selector"-->
+            <!--android:background="#00000000"/>-->
 
-        <ImageButton
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
-            android:background="#00000000"/>
+        <!--<ImageButton-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:src="@drawable/ic_bluetooth_selector"-->
+            <!--android:background="#00000000"/>-->
 
-        <ImageButton
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
-            android:background="#00000000"/>
+        <!--<ImageButton-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:src="@drawable/ic_bluetooth_selector"-->
+            <!--android:background="#00000000"/>-->
 
-        <ImageButton
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
-            android:background="#00000000"/>
+        <!--<ImageButton-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:src="@drawable/ic_bluetooth_selector"-->
+            <!--android:background="#00000000"/>-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
 </LinearLayout>
 

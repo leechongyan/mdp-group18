@@ -1,27 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:layout_marginBottom="10dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/equipment_type"
         android:layout_width="50dp"
-        android:layout_height="match_parent"
+        android:layout_height="50dp"
         android:layout_marginStart="30dp"
-        android:src="@drawable/ic_laptop_black_24dp"/>
+        android:src="@drawable/ic_laptop_black_24dp" />
 
-    <TextView
-        android:id="@+id/device_element_name"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="30dp"
-        android:layout_toEndOf="@+id/equipment_type"
-        android:text="name of device"
-        android:textSize="20sp"
-        android:textAlignment="gravity"
-        android:gravity="center"
-        android:textColor="#ffffff"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/deviceName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:gravity="center"
+            android:text="name of device"
+            android:textColor="#ffffff"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/deviceAddress"
+            android:text="address"
+            android:layout_marginStart="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+</LinearLayout>
