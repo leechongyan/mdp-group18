@@ -84,7 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_marginStart="30dp"
-                    android:text="PAIRED DEVICE"
+                    android:text="PAIRED DEVICES"
                     android:textColor="#ffffff"
                     android:textSize="20sp"
                     android:textAlignment="gravity"
@@ -93,7 +93,8 @@
                 <LinearLayout
                     android:id="@+id/paired_device_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <include layout="@layout/device_element"/>
 
@@ -177,6 +178,7 @@
                         android:gravity="center"/>
 
                     <ImageButton
+                        android:id="@+id/discover_button"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
@@ -186,11 +188,19 @@
 
                 </RelativeLayout>
 
-                <include
-                    android:id="@+id/available_device_test"
-                    layout="@layout/device_element"/>
-                <include layout="@layout/device_element"/>
-                <include layout="@layout/device_element"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/available_devices_container"
+                    android:orientation="vertical">
+
+                    <include
+                        android:id="@+id/available_device_test"
+                        layout="@layout/device_element"/>
+                    <include layout="@layout/device_element"/>
+                    <include layout="@layout/device_element"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 

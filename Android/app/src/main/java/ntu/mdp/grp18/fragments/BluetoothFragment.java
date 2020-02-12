@@ -1,7 +1,14 @@
 package ntu.mdp.grp18.fragments;
 
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -20,8 +28,14 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Set;
+
+import ntu.mdp.grp18.BluetoothService;
+import ntu.mdp.grp18.MainActivity;
 import ntu.mdp.grp18.R;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 
@@ -30,6 +44,12 @@ public class BluetoothFragment extends Fragment {
     Switch bluetoothSwitch;
     EditText deviceNameEditText;
 
+    BluetoothService btService;
+    boolean isBtServiceBound = false;
+
+    /**
+     * Listeners------------------------------------------------------------------------------------
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -41,89 +61,128 @@ public class BluetoothFragment extends Fragment {
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
 
-        //Bluetooth on/off control-------------------------------------------------------------------------------
-        bluetoothSwitch = view.findViewById(R.id.bluetooth_switch);
+        //Bluetooth on/off control
+        initBluetoothSwitch(view);
 
-        boolean isBluetoothOn = false;
-        //Todo: [BE] get the state of bluetooth(on or off) from "shared preference" and put it into isBluetoothOn
-        bluetoothSwitch.setChecked(isBluetoothOn);
-
-        if(isBluetoothOn){
-            onBluetoothOn(view);
-        }
-        else {
-            onBluetoothOff(view);
-        }
-
-        bluetoothSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                if (isChecked) {
-                    //test
-                    Log.d("debug", "switch is on");
-
-                    onBluetoothOn(view);
-                }
-                else {
-                    //test
-                    Log.d("debug", "switch is off");
-
-                    onBluetoothOff(view);
-                }
-
-            }
-        });
-
-        //Bluetooth device name section----------------------------------------------------------------------
+        //Bluetooth device name section
         initBluetoothDeviceNameSection(view);
 
-        //monitor bluetooth connectivity-----------------------------------------------------------------
-        //Todo: [FE] create a thread that will be polling bluetooth connectivity every 1 or 2 seconds constantly
+        //Bluetooth paired devices section
+        initPairedDevicesSection(view);
+
+        //Bluetooth testing section
+        initBluetoothTestingSection(view);
+
+        //Bluetooth available devices section
+        initBluetoothAvailableDevicesSection(view);
 
     }
 
-    public void onBluetoothOn(View view){
-        //show views that need to be shown when bluetooth is on
-        setVisibilitiesWithBluetoothState(view, true);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Register for broadcasts on BluetoothAdapter state change
+        IntentFilter stateChangeFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        getActivity().registerReceiver(stateChangeReceiver, stateChangeFilter);
 
-        //init available devices section
-        initBluetoothAvailableDevicesSection(view);
+        IntentFilter deviceFoundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        getActivity().registerReceiver(deviceFoundReceiver, deviceFoundFilter);
+    }
 
-        //set device name to be not focusable
-        setFocusableForDeviceName(view, true);
+    @Override
+    public void onPause() {
+        super.onPause();
+        //Unregister for broadcasts
+        getActivity().unregisterReceiver(stateChangeReceiver);
+        getActivity().unregisterReceiver(deviceFoundReceiver);
 
+        //cancel discovery
+        btService.cancelDiscovery();
+    }
+
+    public void onBluetoothSwitchOn(){
         //turn on bluetooth
-        //Todo: [BT] turn on bluetooth and make our tablet visible to nearby devices, if it's not already turned on
+        if(isBtServiceBound){
+            btService.startBluetooth(this);
+        }
+    }
 
-        //store bluetooth state
-        //Todo: [BE] store the bluetooth state(on) to "shared preference"
+    public void onBluetoothSwitchOff(){
+        //turn off bluetooth
+        if(isBtServiceBound){
+            btService.stopBluetooth();
+        }
+        //test
+        onBluetoothOff(getView());
+    }
 
-
-        //handle paired device section
-        //init state to device being disconnected
-        onDeviceDisconnected(view);
-
-        String pairedDeviceName = "";
-        //Todo: [BT] return the paired device name if there's a device that is paired with our tablet at the moment
-        if(pairedDeviceName != ""){
-            onDeviceConnected(view, pairedDeviceName);
+    //In case user denies the change of bluetooth status
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data); comment this unless you want to pass your result to the activity.
+        if(resultCode == RESULT_CANCELED){
+            onBluetoothOff(getView());
+            //test
+            Log.d("debug", "result_canceled");
         }
         else{
-            //if there's no device paired with out tablet at the moment, try connect to the device we connected to last time
-            //Todo: [BE] retrieve the paired device name from "shared preference" if there is one
-            if(pairedDeviceName != ""){
-                //Todo: [BT] try to connect to the device with the name pairedDeviceName
-            }
+            onBluetoothOn(getView());
+            Log.d("debug", "result_ok");
+        }
+    }
+
+    public void onBluetoothServiceBound(){
+        //initialize bluetooth service
+        btService = ((MainActivity)getActivity()).getBtService();
+        isBtServiceBound = true;
+        boolean isBluetoothOn;
+        isBluetoothOn = btService.isBluetoothOn();
+        if(isBluetoothOn){
+            onBluetoothOn(getView());
+        }
+        else{
+            onBluetoothOff(getView());
+        }
+    }
+
+    public void onBluetoothServiceUnbound(){
+        btService = null;
+        isBtServiceBound = false;
+    }
+
+    public void onBluetoothOn(View view){
+
+        //set if not already done
+        bluetoothSwitch.setChecked(true);
+
+        //show views that need to be shown when bluetooth is on
+        setVisibilitiesWithBluetoothState(view, BluetoothAdapter.STATE_ON);
+
+        //set our device name to be not focusable
+        setFocusableForDeviceName(view, true);
+
+        //set paired devices
+        setPairedDevices(view);
+
+        clearAvailableDevices(view);
+
+        //start listening for incoming connections
+        if(isBtServiceBound){
+            btService.startServer();
         }
 
     }
 
     public void onBluetoothOff(View view){
+
+        //set if not already done
+        bluetoothSwitch.setChecked(false);
+
         //handle disconnection
-        onDeviceDisconnected(view);
+        //Todo: onDeviceDisconnected(view);
 
         //hide views that need to be hidden when bluetooth is off
-        setVisibilitiesWithBluetoothState(view, false);
+        setVisibilitiesWithBluetoothState(view, BluetoothAdapter.STATE_OFF);
 
         //set device name to be not focusable
         setFocusableForDeviceName(view, false);
@@ -131,71 +190,103 @@ public class BluetoothFragment extends Fragment {
         //store bluetooth state
         //Todo: [BE] store the bluetooth state(off) to "shared preference"
 
-        //turn off bluetooth
-        //Todo: [BT] turn off bluetooth if it's not already turned off
     }
 
-    public void onDeviceConnected(View view, String pairedDeviceName){
-        setPairedDevice(view, pairedDeviceName);
+    private final BroadcastReceiver stateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
 
-        //store paired device name
-        //Todo: [BE] store the paired device name to "shared preference"
+            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.STATE_OFF:
+                        onBluetoothOff(getView());
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        //test
+                        Log.d("debug", "Bluetooth turning off");
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        onBluetoothOn(getView());
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        //test
+                        Log.d("debug", "Bluetooth turning on");
+                        break;
+                }
+            }
+        }
+    };
 
-        //init testing section
-        initBluetoothTestingSection(view);
-    }
+    private final BroadcastReceiver deviceFoundReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
 
-    public void onDeviceDisconnected(View view){
+            if (action != null && action.equals(BluetoothDevice.ACTION_FOUND)) {
+                // Discovery has found a device. Get the BluetoothDevice
+                // object and its info from the Intent.
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                boolean exist = false;
+
+                //add available device to bluetooth service
+                if (isBtServiceBound) {
+                    exist = btService.addAvailableDevice(device);
+                }
+
+                //add available device to available devices section
+                if(!exist){
+                    addAvailableDevice(getView(), device);
+                }
+
+            }
+
+        }
+    };
+
+    private final BroadcastReceiver connectionChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if(action != null && action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)){
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, BluetoothAdapter.ERROR);
+                if(state == BluetoothAdapter.STATE_CONNECTED){
+                    setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_CONNECTED);
+                }
+            }
+        }
+    };
+
+    /**
+     * Initialization-------------------------------------------------------------------------------
+     */
+    public void initPairedDevicesSection(View view){
         //clear paired device section
-        clearPairedDevice(view);
+        clearPairedDevices(view);
 
         //hide testing section
         LinearLayout bluetoothTestingSection = view.findViewById(R.id.bluetooth_testing_section);
         bluetoothTestingSection.setVisibility(View.GONE);
     }
 
-    //show or hide views related to bluetooth
-    public void setVisibilitiesWithBluetoothState(View view, boolean isBluetoothOn){
-        LinearLayout[] linearLayouts = new LinearLayout[3];
-        linearLayouts[0] = view.findViewById(R.id.paired_device_section);
-        linearLayouts[1] = view.findViewById(R.id.available_devices_section);
+    public void initBluetoothSwitch(View view){
+        bluetoothSwitch = view.findViewById(R.id.bluetooth_switch);
 
-        int visibility = isBluetoothOn ? View.VISIBLE : View.GONE;
+        bluetoothSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-        for(int i=0; i<linearLayouts.length; i++){
-            if(linearLayouts[i] != null) {
-                linearLayouts[i].setVisibility(visibility);
+                if (isChecked) {
+                    onBluetoothSwitchOn();
+                }
+                else {
+                    onBluetoothSwitchOff();
+                }
+
             }
-        }
-    }
-
-    //set paired device to paired device section
-    public void setPairedDevice(View view, String deviceName){
-        //clear paired device container
-        clearPairedDevice(view);
-
-        LinearLayout pairedDeviceSection = view.findViewById(R.id.paired_device_section);
-        LinearLayout pairedDeviceContainer = pairedDeviceSection.findViewById(R.id.paired_device_container);
-
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View pairedDeviceElement = inflater.inflate(R.layout.device_element, pairedDeviceContainer);
-
-        //set device name for paired device element
-        TextView pairedDeviceNameTextView = pairedDeviceElement.findViewById(R.id.device_element_name);
-        pairedDeviceNameTextView.setText(deviceName);
-    }
-
-    //clear paired device from paired device section
-    public void clearPairedDevice(View view){
-        LinearLayout pairedDeviceSection = view.findViewById(R.id.paired_device_section);
-        LinearLayout pairedDeviceContainer = pairedDeviceSection.findViewById(R.id.paired_device_container);
-        pairedDeviceContainer.removeAllViews();
-    }
-
-    public void setFocusableForDeviceName(View view, boolean isFocusable){
-        EditText deviceNameView = view.findViewById(R.id.device_name_edittext);
-        deviceNameView.setFocusableInTouchMode(isFocusable);
-        deviceNameView.setFocusable(isFocusable);
+        });
     }
 
     public void initBluetoothDeviceNameSection(View view){
@@ -237,7 +328,7 @@ public class BluetoothFragment extends Fragment {
     public void initBluetoothTestingSection(View view){
         //show testing section
         LinearLayout bluetoothTestingSection = view.findViewById(R.id.bluetooth_testing_section);
-        bluetoothTestingSection.setVisibility(View.VISIBLE);
+        bluetoothTestingSection.setVisibility(View.GONE);
 
         ImageButton sendBluetoothTextButton = view.findViewById(R.id.bluetooth_testing_send_button);
         final EditText testingEditText = view.findViewById(R.id.testing_edittext);
@@ -257,20 +348,179 @@ public class BluetoothFragment extends Fragment {
     public void initBluetoothAvailableDevicesSection(final View fragment){
         LinearLayout availableDevicesSection = fragment.findViewById(R.id.available_devices_section);
 
-        //test
-        View availableDeviceElement = availableDevicesSection.findViewById(R.id.available_device_test);
-        availableDeviceElement.setOnClickListener(new View.OnClickListener() {
+        availableDevicesSection.setVisibility(View.GONE);
+
+        clearAvailableDevices(fragment);
+
+        ImageButton discoveryButton = availableDevicesSection.findViewById(R.id.discover_button);
+        discoveryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onDeviceConnected(fragment, "test");
+                //clear available devices
+                clearAvailableDevices(getView());
+                //start searching for available devices
+                if(isBtServiceBound){
+                    btService.startDiscovery();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Stop discovery after 15s
+                            btService.cancelDiscovery();
+                            //test
+                            Toast.makeText(getContext(), "Search done", Toast.LENGTH_SHORT).show();
+                        }
+                    }, 15000);
+                }
+                //test
+                Toast.makeText(getContext(), "searching", Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    public boolean isBluetoothConnected(){
-        //Todo: [BT] return a boolean showing whether bluetooth is current connected or not
-        //test
-        return false;
+    /**
+     * Layout changes-------------------------------------------------------------------------------
+     */
+    //show or hide views related to bluetooth
+    public void setVisibilitiesWithBluetoothState(View view, int state){
+        LinearLayout[] linearLayouts = new LinearLayout[3];
+        linearLayouts[0] = view.findViewById(R.id.paired_device_section);
+        linearLayouts[1] = view.findViewById(R.id.available_devices_section);
+        linearLayouts[2] = view.findViewById(R.id.bluetooth_testing_section);
+
+        for(int j=0; j<linearLayouts.length; j++){
+            linearLayouts[j].setVisibility(View.GONE);
+        }
+
+        int i;
+        switch (state){
+            case BluetoothAdapter.STATE_CONNECTED:
+                i = 3;
+                break;
+
+            case BluetoothAdapter.STATE_ON:
+                i = 2;
+                break;
+
+            default:
+                i = 0;
+                break;
+        }
+
+        for(int j=0; j<i; j++){
+            if(linearLayouts[j] != null) {
+                linearLayouts[j].setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    //set paired device to paired device section
+    public void setPairedDevices(View view){
+        //clear paired device container
+        clearPairedDevices(view);
+
+        //set device elements
+        if(isBtServiceBound){
+            Set<BluetoothDevice> pairedDevices;
+            pairedDevices = btService.getPairedDevices();
+            for (BluetoothDevice device : pairedDevices) {
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress(); // MAC address
+
+                //add paired device
+                addPairedDevice(view, device);
+                //test
+                Log.d("debug", "paired device: " + deviceName);
+
+            }
+        }
+    }
+
+    public void addPairedDevice(View view, BluetoothDevice device){
+        String deviceName = device.getName();
+        String deviceAdress = device.getAddress();
+
+        LinearLayout pairedDeviceSection = view.findViewById(R.id.paired_device_section);
+        LinearLayout pairedDeviceContainer = pairedDeviceSection.findViewById(R.id.paired_device_container);
+
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
+        View pairedDeviceElement = inflater.inflate(R.layout.device_element, pairedDeviceContainer, false);
+
+        //set device name for paired device element
+        TextView pairedDeviceNameTextView = pairedDeviceElement.findViewById(R.id.device_element_name);
+        if(deviceName != null && deviceName.length()>0){
+            pairedDeviceNameTextView.setText(deviceName);
+        }
+        else{
+            pairedDeviceNameTextView.setText(deviceAdress);
+        }
+//        pairedDeviceNameTextView.setId(0);
+
+        pairedDeviceElement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TextView pairedDeviceNameTextView = view.findViewById(R.id.device_element_name);
+                if(isBtServiceBound){
+                    btService.startClient(pairedDeviceNameTextView.getText().toString());
+                }
+                //test
+                Toast.makeText(getContext(), pairedDeviceNameTextView.getText().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        pairedDeviceContainer.addView(pairedDeviceElement);
+
+    }
+
+    //clear paired device from paired device section
+    public void clearPairedDevices(View view){
+        LinearLayout pairedDeviceSection = view.findViewById(R.id.paired_device_section);
+        LinearLayout pairedDeviceContainer = pairedDeviceSection.findViewById(R.id.paired_device_container);
+        pairedDeviceContainer.removeAllViews();
+    }
+
+    public void setFocusableForDeviceName(View view, boolean isFocusable){
+        EditText deviceNameView = view.findViewById(R.id.device_name_edittext);
+        deviceNameView.setFocusableInTouchMode(isFocusable);
+        deviceNameView.setFocusable(isFocusable);
+    }
+
+    public void clearAvailableDevices(View view){
+        LinearLayout availableDevicesSection = view.findViewById(R.id.available_devices_section);
+        LinearLayout availableDevicesContainer = availableDevicesSection.findViewById(R.id.available_devices_container);
+        availableDevicesContainer.removeAllViews();
+    }
+
+    public void addAvailableDevice(View view, BluetoothDevice device){
+        String deviceName = device.getName();
+        String deviceAddress = device.getAddress();
+
+        LinearLayout availableDevicesSection = view.findViewById(R.id.available_devices_section);
+        LinearLayout availableDevicesContainer = availableDevicesSection.findViewById(R.id.available_devices_container);
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
+        View availableDevice = inflater.inflate(R.layout.device_element, availableDevicesContainer, false);
+        TextView availableDeviceName = availableDevice.findViewById(R.id.device_element_name);
+        if(deviceName != null && deviceName.length() > 0){
+            availableDeviceName.setText(deviceName);
+        }
+        else{
+            availableDeviceName.setText(deviceAddress);
+        }
+//        availableDeviceName.setId(0);
+
+        availableDevice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TextView availableDeviceName = view.findViewById(R.id.device_element_name);
+                if(isBtServiceBound){
+                    btService.startClient(availableDeviceName.getText().toString());
+                }
+                //test
+                Toast.makeText(getContext(), availableDeviceName.getText().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        availableDevicesContainer.addView(availableDevice);
     }
 
 }

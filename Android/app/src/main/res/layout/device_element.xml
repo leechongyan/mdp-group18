@@ -24,4 +24,17 @@
         android:gravity="center"
         android:textColor="#ffffff"/>
 
+    <TextView
+        android:id="@+id/device_connection_state"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="30dp"
+        android:layout_alignParentEnd="true"
+        android:text="connected"
+        android:textSize="20sp"
+        android:textAlignment="gravity"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:visibility="invisible"/>
+
 </RelativeLayout>
