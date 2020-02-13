@@ -496,6 +496,7 @@ public class BluetoothService extends Service {
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
+                    Toast.makeText(getBaseContext(), "Incoming message: " + incomingMessage, Toast.LENGTH_SHORT).show();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -507,6 +508,7 @@ public class BluetoothService extends Service {
         public void write(byte[] bytes){
             String text = new String(bytes, Charset.defaultCharset());
             Log.d(TAG, "write: Writing to output stream:" + text);
+
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
