@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">MDP</string>
+    <string name="pref_command_change">Change communication commands</string>
+    <string name="pref_direction_change">Change direction commands</string>
+    <string name="pref_strafe_left">Strafe Left</string>
+    <string name="pref_strafe_left_default">sl</string>
+    <string name="pref_strafe_right">Strafe Right</string>
+    <string name="pref_strafe_right_default">sr</string>
+    <string name="pref_forward">Forward</string>
+    <string name="pref_forward_default">f</string>
+    <string name="pref_rotate_left">Rotate Left</string>
+    <string name="pref_rotate_left_default">tl</string>
+    <string name="pref_reverse">Reverse</string>
+    <string name="pref_reverse_default">r</string>
+    <string name="pref_rotate_right">Rotate Right</string>
+    <string name="pref_rotate_right_default">tr</string>
+    <string name="pref_algo_change">Change operation commands</string>
+    <string name="pref_begin_exploration">Begin Exploration</string>
+    <string name="pref_begin_exploration_default">beginExplore</string>
+    <string name="pref_begin_fastest_path">Begin Fastest Path</string>
+    <string name="pref_begin_fastest_path_default">beginFastest</string>
+    <string name="pref_send_arena_info">Send Arena Info</string>
+    <string name="pref_send_arena_info_default">sendArena</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

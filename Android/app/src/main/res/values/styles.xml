@@ -8,7 +8,52 @@
         <item name="colorAccent">#ffffff</item>
         <!--<item name="actionBarSize">80dp</item>-->
         <!--<item name="actionBarItemBackground">@color/colorPrimaryDark</item>-->
+        <item name="preferenceTheme">
+            @style/PreferenceThemeOverlay
+        </item>
+        <item name="dialogTheme">@style/AppCompatDialog</item>
+        <item name="alertDialogTheme">@style/AppCompatAlert</item>
     </style>
+
+    <style name="PreferenceThemeOverlay">
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="preferenceScreenStyle">@style/Preference.PreferenceScreen</item>
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment</item>
+        <item name="preferenceCategoryStyle">@style/Preference.Category</item>
+        <item name="preferenceStyle">@style/Preference</item>
+        <item name="preferenceInformationStyle">@style/Preference.Information</item>
+        <item name="checkBoxPreferenceStyle">@style/Preference.CheckBoxPreference</item>
+        <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat</item>
+        <item name="dialogPreferenceStyle">@style/Preference.DialogPreference</item>
+        <item name="editTextPreferenceStyle">@style/Preference.DialogPreference.EditTextPreference</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList</item>
+    </style>
+
+    <!-- Generic Dialog Theme -->
+    <style name="AppCompatDialog" parent="Theme.AppCompat.Dialog">
+        <!-- Used for the title and text -->
+        <item name="android:textColorPrimary">@color/colorPrimaryLight</item>
+        <item name="android:textColorSecondary">@color/colorPrimaryLight</item>
+        <!-- Used for the background -->
+        <item name="android:background">@color/colorPrimary</item>
+        <!-- Used for the buttons -->
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+    </style>
+
+    <!-- Alert Dialog Theme -->
+    <style name="AppCompatAlert" parent="Theme.AppCompat.Dialog.Alert">
+        <!-- Used for the title and text -->
+        <item name="android:textColorPrimary">@color/colorPrimaryLight</item>
+        <item name="android:textColorSecondary">@color/colorPrimaryLight</item>
+
+        <!-- Used for the background -->
+        <item name="android:background">@color/colorPrimary</item>
+        <!-- Used for the buttons -->
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+    </style>
+
 
 
 </resources>
