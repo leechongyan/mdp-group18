@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <android.support.v7.preference.PreferenceCategory android:title="@string/pref_direction_change" >
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_strafe_left"
+            android:summary="@string/pref_strafe_left_default"
+            android:defaultValue="@string/pref_strafe_left_default"
+            android:key="prefstrafeleft"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_strafe_right"
+            android:summary="@string/pref_strafe_right_default"
+            android:defaultValue="@string/pref_strafe_right_default"
+            android:key="prefstraferight"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_forward"
+            android:summary="@string/pref_forward_default"
+            android:defaultValue="@string/pref_forward_default"
+            android:key="prefforward"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_rotate_left"
+            android:summary="@string/pref_rotate_left_default"
+            android:defaultValue="@string/pref_rotate_left_default"
+            android:key="prefrotateleft"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_rotate_right"
+            android:summary="@string/pref_rotate_right_default"
+            android:defaultValue="@string/pref_rotate_right_default"
+            android:key="prefrotateright"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_reverse"
+            android:summary="@string/pref_reverse_default"
+            android:defaultValue="@string/pref_reverse_default"
+            android:key="prefreverse"/>
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory android:title="@string/pref_algo_change">
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_begin_exploration"
+            android:summary="@string/pref_begin_exploration_default"
+            android:defaultValue="@string/pref_begin_exploration_default"
+            android:key="prefbeginexploration"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_begin_fastest_path"
+            android:summary="@string/pref_begin_fastest_path_default"
+            android:defaultValue="@string/pref_begin_fastest_path_default"
+            android:key="prefbeginfastestpath"/>
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_send_arena_info"
+            android:summary="@string/pref_send_arena_info_default"
+            android:defaultValue="@string/pref_send_arena_info_default"
+            android:key="prefsendarenainfo"/>
+    </android.support.v7.preference.PreferenceCategory>
+
+</android.support.v7.preference.PreferenceScreen>

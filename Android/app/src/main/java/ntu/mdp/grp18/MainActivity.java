@@ -5,16 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
 import android.util.Log;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import ntu.mdp.grp18.fragments.BluetoothFragment;
+import ntu.mdp.grp18.fragments.OnBluetoothServiceBoundListener;
+import ntu.mdp.grp18.fragments.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,31 +27,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ImageButton bluetoothPageBtn = findViewById(R.id.bluetooth_page_bottom_nav_btn);
+        ImageButton settingPageBtn = findViewById(R.id.setting_page_bottom_nav_btn);
+        ImageButton mapPageBtn = findViewById(R.id.map_page_bottom_nav_btn);
 
-//        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-//        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//                Fragment selectedFragment;
-//
-//                switch (menuItem.getItemId()){
-//                    case R.id.icon1:
-//                        selectedFragment = new BluetoothFragment();
-//                        break;
-//                    default:
-//                        //TODO:Complete the switch statement
-//                        selectedFragment = new BluetoothFragment();
-//                }
-//
-//                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
-//
-//                return true;
-//            }
-//        });
+        bluetoothPageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
+                setPageTitle("BLUETOOTH");
+            }
+        });
+
+        settingPageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
+                setPageTitle("SETTINGS");
+            }
+        });
 
         //Create default fragment
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
-
+        setPageTitle("BLUETOOTH");
     }
 
     @Override
@@ -88,19 +87,19 @@ public class MainActivity extends AppCompatActivity {
 
             //tell fragment bluetooth service is bound
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-            if(fragment instanceof BluetoothFragment){
-                ((BluetoothFragment) fragment).onBluetoothServiceBound();
+            if(fragment instanceof OnBluetoothServiceBoundListener){
+                ((OnBluetoothServiceBoundListener) fragment).onBluetoothServiceBound();
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
             btServiceBound = false;
-            //tell fragment bluetooth service is unbound
-            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-            if(fragment instanceof BluetoothFragment){
-                ((BluetoothFragment) fragment).onBluetoothServiceUnbound();
-            }
+//            //tell fragment bluetooth service is unbound
+//            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+//            if(fragment instanceof OnBluetoothServiceBoundListener){
+//                ((OnBluetoothServiceBoundListener) fragment).onBluetoothServiceUnbound();
+//            }
         }
     };
 
@@ -110,5 +109,10 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean isBtServiceBound() {
         return btServiceBound;
+    }
+
+    private void setPageTitle(String title){
+        TextView pageTitleTextView = findViewById(R.id.page_title);
+        pageTitleTextView.setText(title);
     }
 }

@@ -1,6 +1,5 @@
 package ntu.mdp.grp18.fragments;
 
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -35,19 +34,15 @@ import ntu.mdp.grp18.MainActivity;
 import ntu.mdp.grp18.R;
 
 import static android.app.Activity.RESULT_CANCELED;
-import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 
-public class BluetoothFragment extends Fragment {
+public class BluetoothFragment extends Fragment implements OnBluetoothServiceBoundListener{
 
     final String  TAG = "BluetoothFragment";
 
     Switch bluetoothSwitch;
     EditText deviceNameEditText;
-
-    BluetoothService btService;
-    boolean isBtServiceBound = false;
 
     /**
      * Listeners------------------------------------------------------------------------------------
@@ -81,6 +76,22 @@ public class BluetoothFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        Log.d(TAG, "onStart: ");
+        super.onStart();
+        boolean isBluetoothOn = false;
+        if(isBtServiceBound()){
+            isBluetoothOn = getBtService().isBluetoothOn();
+        }
+        if(isBluetoothOn){
+            onBluetoothOn(getView());
+        }
+        else{
+            onBluetoothOff(getView());
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         // Register for broadcasts on BluetoothAdapter state change
@@ -90,13 +101,14 @@ public class BluetoothFragment extends Fragment {
         IntentFilter deviceFoundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         getActivity().registerReceiver(deviceFoundReceiver, deviceFoundFilter);
 
-        IntentFilter connectionChangeFilter = new IntentFilter();
-        connectionChangeFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        connectionChangeFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        IntentFilter connectionChangeFilter = new IntentFilter(BluetoothService.ACTION_BLUETOOTH_CONNECTION_CHANGED);
         getActivity().registerReceiver(connectionChangeReceiver, connectionChangeFilter);
 
         IntentFilter deviceBoundFilter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         getActivity().registerReceiver(deviceBoundReceiver, deviceBoundFilter);
+
+        IntentFilter messageReceiveFilter = new IntentFilter(BluetoothService.ACTION_BLUETOOTH_MESSAGE_RECEIVED);
+        getActivity().registerReceiver(btMessageReceiver, messageReceiveFilter);
 
     }
 
@@ -108,22 +120,25 @@ public class BluetoothFragment extends Fragment {
         getActivity().unregisterReceiver(deviceFoundReceiver);
         getActivity().unregisterReceiver(connectionChangeReceiver);
         getActivity().unregisterReceiver(deviceBoundReceiver);
+        getActivity().unregisterReceiver(btMessageReceiver);
 
         //cancel discovery
-        btService.cancelDiscovery();
+        if(isBtServiceBound()){
+            getBtService().cancelDiscovery();
+        }
     }
 
     public void onBluetoothSwitchOn(){
         //turn on bluetooth
-        if(isBtServiceBound){
-            btService.startBluetooth(this);
+        if(isBtServiceBound()){
+            getBtService().startBluetooth(this);
         }
     }
 
     public void onBluetoothSwitchOff(){
         //turn off bluetooth
-        if(isBtServiceBound){
-            btService.stopBluetooth();
+        if(isBtServiceBound()){
+            getBtService().stopBluetooth();
         }
         //test
         onBluetoothOff(getView());
@@ -145,22 +160,14 @@ public class BluetoothFragment extends Fragment {
     }
 
     public void onBluetoothServiceBound(){
-        //initialize bluetooth service
-        btService = ((MainActivity)getActivity()).getBtService();
-        isBtServiceBound = true;
         boolean isBluetoothOn;
-        isBluetoothOn = btService.isBluetoothOn();
+        isBluetoothOn = getBtService().isBluetoothOn();
         if(isBluetoothOn){
             onBluetoothOn(getView());
         }
         else{
             onBluetoothOff(getView());
         }
-    }
-
-    public void onBluetoothServiceUnbound(){
-        btService = null;
-        isBtServiceBound = false;
     }
 
     public void onBluetoothOn(View view){
@@ -179,11 +186,6 @@ public class BluetoothFragment extends Fragment {
 
         clearAvailableDevices(view);
 
-        //start listening for incoming connections
-        if(isBtServiceBound){
-            btService.startServer();
-        }
-
     }
 
     public void onBluetoothOff(View view){
@@ -191,17 +193,11 @@ public class BluetoothFragment extends Fragment {
         //set if not already done
         bluetoothSwitch.setChecked(false);
 
-        //handle disconnection
-        //Todo: onDeviceDisconnected(view);
-
         //hide views that need to be hidden when bluetooth is off
         setVisibilitiesWithBluetoothState(view, BluetoothAdapter.STATE_OFF);
 
         //set device name to be not focusable
         setFocusableForDeviceName(view, false);
-
-        //store bluetooth state
-        //Todo: [BE] store the bluetooth state(off) to "shared preference"
 
     }
 
@@ -246,8 +242,8 @@ public class BluetoothFragment extends Fragment {
                 boolean exist = false;
 
                 //add available device to bluetooth service
-                if (isBtServiceBound) {
-                    exist = btService.addAvailableDevice(device);
+                if (isBtServiceBound()) {
+                    exist = getBtService().addAvailableDevice(device);
                 }
 
                 //add available device to available devices section
@@ -260,25 +256,38 @@ public class BluetoothFragment extends Fragment {
         }
     };
 
+    private final BroadcastReceiver btMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getContext(), intent.getStringExtra(BluetoothService.EXTRA_MESSAGE), Toast.LENGTH_SHORT).show();
+        }
+    };
+
     private final BroadcastReceiver connectionChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if(BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)){
-                setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_CONNECTED);
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                Log.d(TAG, "onReceive: " + device.getName() + " connected");
-                //test
-                Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " connected", Toast.LENGTH_LONG).show();
-            }
-            else if(BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)){
-                setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_DISCONNECTED);
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.d(TAG, "onReceive: " + device.getName() + " disconnected");
-                //test
-                Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " disconnected", Toast.LENGTH_LONG).show();
-
+            final int bluetoothState = intent.getIntExtra(BluetoothService.EXTRA_STATE, BluetoothService.STATE_ERROR);
+            final BluetoothDevice device = intent.getParcelableExtra(BluetoothService.EXTRA_DEVICE);
+            switch (bluetoothState){
+                case BluetoothService.STATE_CONNECTED:
+                    setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_CONNECTED);
+                    Log.d(TAG, "onReceive: " + device.getName() + " connected");
+                    //test
+                    Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " connected", Toast.LENGTH_LONG).show();
+                    break;
+                case BluetoothService.STATE_DISCONNECTED:
+                    setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_DISCONNECTED);
+                    Log.d(TAG, "onReceive: " + device.getName() + " disconnected");
+                    //test
+                    Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " disconnected", Toast.LENGTH_LONG).show();
+                    break;
+                case BluetoothService.STATE_RECONNECTING:
+                    //test
+                    Log.d(TAG, "onReceive: " + device.getName() + " reconnecting");
+                    Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " reconnecting", Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    Log.d(TAG, "onReceive: bluetooth connection change: ERROR");
             }
         }
     };
@@ -402,8 +411,8 @@ public class BluetoothFragment extends Fragment {
                     //test
                     Toast.makeText(getContext(), testingText, Toast.LENGTH_SHORT).show();
 
-                    if(isBtServiceBound){
-                        btService.write(testingText);
+                    if(isBtServiceBound()){
+                        getBtService().write(testingText);
                     }
                 }
             }
@@ -424,14 +433,14 @@ public class BluetoothFragment extends Fragment {
                 //clear available devices
                 clearAvailableDevices(getView());
                 //start searching for available devices
-                if(isBtServiceBound){
-                    btService.startDiscovery();
+                if(isBtServiceBound()){
+                    getBtService().startDiscovery();
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             //Stop discovery after 15s
-                            btService.cancelDiscovery();
+                            getBtService().cancelDiscovery();
                             //test
                             Toast.makeText(getContext(), "Search done", Toast.LENGTH_SHORT).show();
                         }
@@ -491,9 +500,9 @@ public class BluetoothFragment extends Fragment {
         clearPairedDevices(view);
 
         //set device elements
-        if(isBtServiceBound){
+        if(isBtServiceBound()){
             Set<BluetoothDevice> pairedDevices;
-            pairedDevices = btService.getPairedDevices();
+            pairedDevices = getBtService().getPairedDevices();
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
@@ -509,7 +518,7 @@ public class BluetoothFragment extends Fragment {
 
     public void addPairedDevice(View view, BluetoothDevice device){
         String deviceName = device.getName();
-        String deviceAdress = device.getAddress();
+        String deviceAddress = device.getAddress();
 
         LinearLayout pairedDeviceSection = view.findViewById(R.id.paired_device_section);
         LinearLayout pairedDeviceContainer = pairedDeviceSection.findViewById(R.id.paired_device_container);
@@ -523,16 +532,15 @@ public class BluetoothFragment extends Fragment {
             pairedDeviceNameTextView.setText(deviceName);
         }
         else{
-            pairedDeviceNameTextView.setText(deviceAdress);
+            pairedDeviceNameTextView.setText(deviceAddress);
         }
-//        pairedDeviceNameTextView.setId(0);
 
         pairedDeviceElement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 TextView pairedDeviceNameTextView = view.findViewById(R.id.device_element_name);
-                if(isBtServiceBound){
-                    btService.startConnecting(pairedDeviceNameTextView.getText().toString());
+                if(isBtServiceBound()){
+                    getBtService().startBtConnection(pairedDeviceNameTextView.getText().toString());
                 }
                 //test
                 Toast.makeText(getContext(), pairedDeviceNameTextView.getText().toString(), Toast.LENGTH_SHORT).show();
@@ -588,14 +596,13 @@ public class BluetoothFragment extends Fragment {
         else{
             availableDeviceName.setText(deviceAddress);
         }
-//        availableDeviceName.setId(0);
 
         availableDevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 TextView availableDeviceName = view.findViewById(R.id.device_element_name);
-                if(isBtServiceBound){
-                    btService.startPairing(availableDeviceName.getText().toString());
+                if(isBtServiceBound()){
+                    getBtService().startBtPairing(availableDeviceName.getText().toString());
                 }
                 //test
                 Toast.makeText(getContext(), availableDeviceName.getText().toString(), Toast.LENGTH_SHORT).show();
@@ -603,6 +610,14 @@ public class BluetoothFragment extends Fragment {
         });
 
         availableDevicesContainer.addView(availableDevice);
+    }
+
+    private BluetoothService getBtService(){
+        return ((MainActivity)getActivity()).getBtService();
+    }
+
+    private boolean isBtServiceBound(){
+        return (getBtService() != null);
     }
 
 }

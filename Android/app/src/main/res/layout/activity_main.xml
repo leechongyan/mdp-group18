@@ -9,11 +9,12 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="70dp"
         android:orientation="horizontal"
         android:background="@color/colorPrimaryDark">
 
         <TextView
+            android:id="@+id/page_title"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="BLUETOOTH"
@@ -39,6 +40,7 @@
         android:background="@color/colorPrimaryDark">
 
         <ImageButton
+            android:id="@+id/bluetooth_page_bottom_nav_btn"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -46,24 +48,19 @@
             android:background="#00000000"/>
 
         <ImageButton
+            android:id="@+id/map_page_bottom_nav_btn"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
+            android:src="@drawable/ic_games_black_24dp"
             android:background="#00000000"/>
 
         <ImageButton
+            android:id="@+id/setting_page_bottom_nav_btn"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
-            android:background="#00000000"/>
-
-        <ImageButton
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_bluetooth_selector"
+            android:src="@drawable/ic_settings_black_24dp"
             android:background="#00000000"/>
 
     </LinearLayout>
