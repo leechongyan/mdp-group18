@@ -51,7 +51,7 @@ public class BluetoothFragment extends Fragment implements OnBluetoothServiceBou
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        return inflater.inflate(R.layout.bluetooth_fragment, container, false);
+        return inflater.inflate(R.layout.fragment_bluetooth, container, false);
 
     }
 
@@ -80,8 +80,10 @@ public class BluetoothFragment extends Fragment implements OnBluetoothServiceBou
         Log.d(TAG, "onStart: ");
         super.onStart();
         boolean isBluetoothOn = false;
+        int bluetoothConnectionState = BluetoothService.STATE_DISCONNECTED;
         if(isBtServiceBound()){
             isBluetoothOn = getBtService().isBluetoothOn();
+            bluetoothConnectionState = getBtService().getBluetoothState();
         }
         if(isBluetoothOn){
             onBluetoothOn(getView());
@@ -524,7 +526,7 @@ public class BluetoothFragment extends Fragment implements OnBluetoothServiceBou
         LinearLayout pairedDeviceContainer = pairedDeviceSection.findViewById(R.id.paired_device_container);
 
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View pairedDeviceElement = inflater.inflate(R.layout.device_element, pairedDeviceContainer, false);
+        View pairedDeviceElement = inflater.inflate(R.layout.element_device, pairedDeviceContainer, false);
 
         //set device name for paired device element
         TextView pairedDeviceNameTextView = pairedDeviceElement.findViewById(R.id.device_element_name);
@@ -588,7 +590,7 @@ public class BluetoothFragment extends Fragment implements OnBluetoothServiceBou
         LinearLayout availableDevicesSection = view.findViewById(R.id.available_devices_section);
         LinearLayout availableDevicesContainer = availableDevicesSection.findViewById(R.id.available_devices_container);
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View availableDevice = inflater.inflate(R.layout.device_element, availableDevicesContainer, false);
+        View availableDevice = inflater.inflate(R.layout.element_device, availableDevicesContainer, false);
         TextView availableDeviceName = availableDevice.findViewById(R.id.device_element_name);
         if(deviceName != null && deviceName.length() > 0){
             availableDeviceName.setText(deviceName);

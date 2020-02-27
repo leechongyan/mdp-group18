@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import ntu.mdp.grp18.fragments.BluetoothFragment;
+import ntu.mdp.grp18.fragments.ControlFragment;
 import ntu.mdp.grp18.fragments.OnBluetoothServiceBoundListener;
 import ntu.mdp.grp18.fragments.SettingsFragment;
 
@@ -21,6 +22,11 @@ public class MainActivity extends AppCompatActivity {
 
     BluetoothService btService;
     boolean btServiceBound = false;
+
+    int currentPage;
+    final int BLUETOOTH_PAGE = 0;
+    final int SETTING_PAGE = 1;
+    final int CONTROL_PAGE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,22 +40,43 @@ public class MainActivity extends AppCompatActivity {
         bluetoothPageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(currentPage == BLUETOOTH_PAGE){
+                    return;
+                }
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
                 setPageTitle("BLUETOOTH");
+                setCurrentPage(BLUETOOTH_PAGE);
+            }
+        });
+
+        mapPageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(currentPage == CONTROL_PAGE){
+                    return;
+                }
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ControlFragment()).commit();
+                setPageTitle("CONTROL");
+                setCurrentPage(CONTROL_PAGE);
             }
         });
 
         settingPageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(currentPage == SETTING_PAGE){
+                    return;
+                }
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
                 setPageTitle("SETTINGS");
+                setCurrentPage(SETTING_PAGE);
             }
         });
 
         //Create default fragment
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
-        setPageTitle("BLUETOOTH");
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ControlFragment()).commit();
+        setPageTitle("CONTROL");
+        setCurrentPage(CONTROL_PAGE);
     }
 
     @Override
@@ -114,5 +141,9 @@ public class MainActivity extends AppCompatActivity {
     private void setPageTitle(String title){
         TextView pageTitleTextView = findViewById(R.id.page_title);
         pageTitleTextView.setText(title);
+    }
+
+    private void setCurrentPage(int currentPage){
+        this.currentPage = currentPage;
     }
 }

@@ -16,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.ArraySet;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -405,9 +406,13 @@ public class BluetoothService extends Service {
         connectedThread.start();
     }
 
-    public void write(String out){
+    public boolean write(String out){
         Log.d(TAG, "write: Write called");
-        connectedThread.write(out.getBytes());
+        if(connectedThread != null && isBluetoothOn()){
+            connectedThread.write(out.getBytes());
+            return true;
+        }
+        return false;
     }
 
     public void startBtPairing(String name){
@@ -549,4 +554,5 @@ public class BluetoothService extends Service {
     private void onBluetoothOn(){
         startServer();
     }
+
 }

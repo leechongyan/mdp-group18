@@ -96,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <include layout="@layout/device_element"/>
+                    <include layout="@layout/element_device"/>
 
                 </LinearLayout>
 
@@ -204,9 +204,9 @@
 
                     <include
                         android:id="@+id/available_device_test"
-                        layout="@layout/device_element"/>
-                    <include layout="@layout/device_element"/>
-                    <include layout="@layout/device_element"/>
+                        layout="@layout/element_device"/>
+                    <include layout="@layout/element_device"/>
+                    <include layout="@layout/element_device"/>
 
                 </LinearLayout>
 
