@@ -115,7 +115,6 @@ public class BluetoothService extends Service {
     public void stopBluetooth(){
         if(isBluetoothOn()){
             bluetoothAdapter.disable();
-            setState(STATE_DISCONNECTED, connectedDevice);
         }
     }
 

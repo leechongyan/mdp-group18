@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">MDP</string>
 
-    <string name="pref_command_change">Change communication commands</string>
     <string name="pref_direction_change">Change direction commands</string>
+    <string name="pref_command_change">Change communication commands</string>
     <string name="pref_strafe_left">Strafe Left</string>
     <string name="pref_strafe_left_default">sl</string>
     <string name="pref_strafe_right">Strafe Right</string>
@@ -15,13 +15,37 @@
     <string name="pref_reverse_default">r</string>
     <string name="pref_rotate_right">Rotate Right</string>
     <string name="pref_rotate_right_default">tr</string>
-    <string name="pref_algo_change">Change operation commands</string>
-    <string name="pref_begin_exploration">Begin Exploration</string>
-    <string name="pref_begin_exploration_default">beginExplore</string>
-    <string name="pref_begin_fastest_path">Begin Fastest Path</string>
-    <string name="pref_begin_fastest_path_default">beginFastest</string>
     <string name="pref_send_arena_info">Send Arena Info</string>
     <string name="pref_send_arena_info_default">sendArena</string>
+
+    <!--    Preference Operation Commands-->
+    <string name="pref_algo_change">Change operation commands</string>
+
+    <string name="pref_begin_exploration">Begin Exploration</string>
+    <string name="pref_begin_exploration_default">beginExplore</string>
+    <string name="pref_begin_exploration_key">PREF_BEGIN_EXPLORATION_KEY</string>
+
+    <string name="pref_begin_fastest_path">Begin Fastest Path</string>
+    <string name="pref_begin_fastest_path_default">beginFastest</string>
+    <string name="pref_begin_fastest_path_key">PREF_BEGIN_FASTEST_PATH_KEY</string>
+
+    <!--    Preference Data Prefix-->
+    <string name="pref_data_prefix">Data Prefix</string>
+
+    <string name="pref_robot_state_prefix_title">Robot State Prefix</string>
+    <string name="pref_robot_state_prefix_default">rs</string>
+    <string name="pref_robot_state_prefix_key">PREF_ROBOT_STATE_PREFIX_KEY</string>
+
+    <string name="pref_map_descriptor_prefix_title">Map Descriptor Prefix</string>
+    <string name="pref_map_descriptor_prefix_default">md</string>
+    <string name="pref_map_descriptor_prefix_key">PREF_MAP_DESCRIPTOR_PREFIX_KEY</string>
+
+    <string name="pref_pc_prefix_title">Pc Prefix</string>
+    <string name="pref_pc_prefix_default">md</string>
+    <string name="pref_pc_prefix_key">PREF_PC_PREFIX</string>
+
+    <string name="pref_wp_prefix_title">Wp Prefix</string>
+    <string name="pref_wp_prefix_key">PREF_WP_PREFIX</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

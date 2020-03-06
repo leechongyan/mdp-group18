@@ -1,8 +1,12 @@
 package ntu.mdp.grp18;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -12,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import ntu.mdp.grp18.fragments.BluetoothFragment;
 import ntu.mdp.grp18.fragments.ControlFragment;
@@ -20,8 +25,12 @@ import ntu.mdp.grp18.fragments.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    static final String TAG = "MainActivity";
+
     BluetoothService btService;
     boolean btServiceBound = false;
+
+    Fragment bluetoothFragment, settingsFragment, controlFragment;
 
     int currentPage;
     final int BLUETOOTH_PAGE = 0;
@@ -37,13 +46,17 @@ public class MainActivity extends AppCompatActivity {
         ImageButton settingPageBtn = findViewById(R.id.setting_page_bottom_nav_btn);
         ImageButton mapPageBtn = findViewById(R.id.map_page_bottom_nav_btn);
 
+        bluetoothFragment = new BluetoothFragment();
+        controlFragment = new ControlFragment();
+        settingsFragment = new SettingsFragment();
+
         bluetoothPageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(currentPage == BLUETOOTH_PAGE){
                     return;
                 }
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, bluetoothFragment).commit();
                 setPageTitle("BLUETOOTH");
                 setCurrentPage(BLUETOOTH_PAGE);
             }
@@ -55,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 if(currentPage == CONTROL_PAGE){
                     return;
                 }
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ControlFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, controlFragment).commit();
                 setPageTitle("CONTROL");
                 setCurrentPage(CONTROL_PAGE);
             }
@@ -67,14 +80,14 @@ public class MainActivity extends AppCompatActivity {
                 if(currentPage == SETTING_PAGE){
                     return;
                 }
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, settingsFragment).commit();
                 setPageTitle("SETTINGS");
                 setCurrentPage(SETTING_PAGE);
             }
         });
 
         //Create default fragment
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ControlFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, controlFragment).commit();
         setPageTitle("CONTROL");
         setCurrentPage(CONTROL_PAGE);
     }
@@ -85,11 +98,15 @@ public class MainActivity extends AppCompatActivity {
         //Bind to and start bluetoothService when main activity starts
         Intent intent = new Intent(this, BluetoothService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+        IntentFilter connectionChangeFilter = new IntentFilter(BluetoothService.ACTION_BLUETOOTH_CONNECTION_CHANGED);
+        registerReceiver(connectionChangeReceiver, connectionChangeFilter);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        unregisterReceiver(connectionChangeReceiver);
     }
 
     @Override
@@ -146,4 +163,30 @@ public class MainActivity extends AppCompatActivity {
     private void setCurrentPage(int currentPage){
         this.currentPage = currentPage;
     }
+
+    private final BroadcastReceiver connectionChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int bluetoothState = intent.getIntExtra(BluetoothService.EXTRA_STATE, BluetoothService.STATE_ERROR);
+            final BluetoothDevice device = intent.getParcelableExtra(BluetoothService.EXTRA_DEVICE);
+            switch (bluetoothState){
+                case BluetoothService.STATE_CONNECTED:
+                    Log.d(TAG, "onReceive: " + device.getName() + " connected");
+                    Toast.makeText(getApplicationContext(), device.getName() + ": " + device.getAddress() + " connected", Toast.LENGTH_LONG).show();
+                    break;
+                case BluetoothService.STATE_DISCONNECTED:
+                    Log.d(TAG, "onReceive: " + device.getName() + " disconnected");
+                    //test
+                    Toast.makeText(getApplicationContext(), device.getName() + ": " + device.getAddress() + " disconnected", Toast.LENGTH_LONG).show();
+                    break;
+                case BluetoothService.STATE_RECONNECTING:
+                    //test
+                    Log.d(TAG, "onReceive: " + device.getName() + " reconnecting");
+                    Toast.makeText(getApplicationContext(), device.getName() + ": " + device.getAddress() + " reconnecting", Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    Log.d(TAG, "onReceive: bluetooth connection change: ERROR");
+            }
+        }
+    };
 }

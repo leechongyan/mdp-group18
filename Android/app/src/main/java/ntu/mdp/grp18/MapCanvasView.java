@@ -12,26 +12,28 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.Toast;
 
 public class MapCanvasView extends View {
 
     final String TAG = "MapCanvasView";
 
-    Paint mapPaintDefault, mapPaintWall;
+    Paint mapPaintSpace, mapPaintWall, mapPaintUnknown, mapPaintWP;
 
-    int[][] map;
-    int[] robotPos;
+    public static int[][] map;
+    public static int[] robotPos;
+    public static int[] wpPos;
 
     int robotDirection;
-    final int DIRECTION_FRONT = 0;
-    final int DIRECTION_RIGHT = 1;
-    final int DIRECTION_BACK = 2;
-    final int DIRECTION_LEFT = 3;
-    final int DIRECTION_DEFAULT = DIRECTION_RIGHT;
+    public static final int DIRECTION_FRONT = 0;
+    public static final int DIRECTION_RIGHT = 1;
+    public static final int DIRECTION_BACK = 2;
+    public static final int DIRECTION_LEFT = 3;
+    public static final int DIRECTION_DEFAULT = DIRECTION_RIGHT;
 
-    final int NUMBER_OF_UNIT_ON_Y = 20;
-    final int NUMBER_OF_UNIT_ON_X = 15;
+    public static final int NUMBER_OF_UNIT_ON_Y = 20;
+    public static final int NUMBER_OF_UNIT_ON_X = 15;
 
     Bitmap robotBitmap;
     Drawable robotDrawable;
@@ -40,6 +42,18 @@ public class MapCanvasView extends View {
 
     public static final int ACTION_ROTATE_LEFT = -1;
     public static final int ACTION_ROTATE_RIGHT = 1;
+
+    // 0: unexplored
+    // 1: explored
+    // 2: blank
+    // 3: obstacle
+    // state will not be in 1
+    public static final int UNEXPLORED = 0;
+    public static final int BLANK = 2;
+    public static final int OBSTACLE = 3;
+    public static final int WP = 4;
+
+    public boolean mapTouchable = false;
 
     public MapCanvasView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -65,23 +79,42 @@ public class MapCanvasView extends View {
 
         for(int i=0; i<NUMBER_OF_UNIT_ON_X; i++){
             for(int j=0; j<NUMBER_OF_UNIT_ON_Y; j++){
-                map[i][j] = (int) (3 * Math.random());
+//                map[i][j] = (int) (3 * Math.random());
+                map[i][j] = UNEXPLORED;
             }
         }
 
-        mapPaintDefault = new Paint();
-        mapPaintDefault.setStyle(Paint.Style.FILL_AND_STROKE);
-        mapPaintDefault.setColor(Color.BLUE);
-        mapPaintDefault.setStrokeWidth(4);
+        //init wp
+        wpPos = new int[2];
+        wpPos[0] = -1;
+        wpPos[1] = -1;
+
+        mapPaintSpace = new Paint();
+        mapPaintSpace.setStyle(Paint.Style.FILL_AND_STROKE);
+        mapPaintSpace.setColor(Color.BLUE);
+        mapPaintSpace.setStrokeWidth(4);
 
         mapPaintWall = new Paint();
         mapPaintWall.setStyle(Paint.Style.FILL_AND_STROKE);
         mapPaintWall.setColor(Color.RED);
         mapPaintWall.setStrokeWidth(4);
+
+        mapPaintUnknown = new Paint();
+        mapPaintUnknown.setStyle(Paint.Style.FILL_AND_STROKE);
+        mapPaintUnknown.setColor(Color.GRAY);
+        mapPaintUnknown.setStrokeWidth(4);
+
+        mapPaintWP = new Paint();
+        mapPaintWP.setStyle(Paint.Style.FILL_AND_STROKE);
+        mapPaintWP.setColor(Color.GREEN);
+        mapPaintWP.setStrokeWidth(4);
+
     }
 
     private void initRobot(){
         robotPos = new int[2];
+        robotPos[0] = 0;
+        robotPos[1] = NUMBER_OF_UNIT_ON_Y - 3;
 
         robotDrawable = getResources().getDrawable(R.drawable.ic_forward_black_24dp, null);
         robotBitmap = getRobotBitmapFromDrawable(robotDrawable);
@@ -90,10 +123,12 @@ public class MapCanvasView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
-            int[] unit = getUnitCoordinateFromXY(event.getX(), event.getY());
-//            Toast.makeText(getContext(), "x: " + unit[0] + " y: " + unit[1], Toast.LENGTH_SHORT).show();
-            onUnitSelect(unit);
+        if(mapTouchable){
+            if(event.getAction() == MotionEvent.ACTION_DOWN){
+                int[] unit = getUnitCoordinateFromXY(event.getX(), event.getY());
+//                Toast.makeText(getContext(), "x: " + unit[0] + " y: " + unit[1], Toast.LENGTH_SHORT).show();
+                onUnitSelect(unit);
+            }
         }
         return super.onTouchEvent(event);
     }
@@ -106,13 +141,19 @@ public class MapCanvasView extends View {
     }
 
     private void onUnitSelect(int[] unit){
-        if(map[unit[0]][unit[1]] != 1){
-            map[unit[0]][unit[1]] = 1;
+        if(map[unit[0]][unit[1]] == BLANK || map[unit[0]][unit[1]] == UNEXPLORED){
+            map[unit[0]][unit[1]] = WP;
+            if(wpPos[0] != -1){
+                map[wpPos[0]][wpPos[1]] = UNEXPLORED;
+            }
+            wpPos[0] = unit[0];
+            wpPos[1] = unit[1];
         }
-        else{
-            map[unit[0]][unit[1]] = 0;
+        else if(map[unit[0]][unit[1]] == WP){
+            map[wpPos[0]][wpPos[1]] = UNEXPLORED;
+            wpPos[0] = -1;
+            wpPos[1] = -1;
         }
-
         reDraw();
     }
 
@@ -121,14 +162,25 @@ public class MapCanvasView extends View {
         Paint unitPaint;
         unitEdge = getMeasuredWidth() / NUMBER_OF_UNIT_ON_X;
 
+        Log.d(TAG, "drawMap: unit edge = " + unitEdge + " measuredWidth = " + getMeasuredWidth());
+
         for(int i=0; i<NUMBER_OF_UNIT_ON_X; i++){
             for(int j=0; j<NUMBER_OF_UNIT_ON_Y; j++){
-                if(map[i][j] == 1){
-                    unitPaint = mapPaintWall;
+                switch (map[i][j]){
+                    case OBSTACLE:
+                        unitPaint = mapPaintWall;
+                        break;
+                    case BLANK:
+                        unitPaint = mapPaintSpace;
+                        break;
+                    case WP:
+                        unitPaint = mapPaintWP;
+                        break;
+                    default:
+                        unitPaint = mapPaintUnknown;
+                        break;
                 }
-                else{
-                    unitPaint = mapPaintDefault;
-                }
+
                 int x = i * unitEdge + offset;
                 int y = j * unitEdge + offset;
                 canvas.drawRect(x, y, x + unitEdge - 2 * offset, y + unitEdge - 2 * offset, unitPaint);
@@ -139,8 +191,9 @@ public class MapCanvasView extends View {
     private void drawRobot(Canvas canvas){
         Matrix matrix = new Matrix();
         int rotation = (robotDirection - DIRECTION_DEFAULT) * 90;
-        matrix.postRotate(rotation, robotBitmap.getWidth()/2, robotBitmap.getHeight()/2);
-        matrix.postScale(3*unitEdge / robotBitmap.getWidth(), 3*unitEdge / robotBitmap.getHeight());
+        Log.d(TAG, "drawRobot: unitEdge = " + unitEdge + " robotBitmapWidth: " + robotBitmap.getWidth());
+        matrix.postRotate(rotation, robotBitmap.getScaledWidth(canvas)/2f, robotBitmap.getScaledHeight(canvas)/2f);
+        matrix.postScale(3f * unitEdge / robotBitmap.getWidth(), 3f * unitEdge / robotBitmap.getHeight());
         matrix.postTranslate(unitEdge * robotPos[0], unitEdge * robotPos[1]);
         canvas.drawBitmap(robotBitmap, matrix, null);
     }
@@ -178,7 +231,7 @@ public class MapCanvasView extends View {
         reDraw();
     }
 
-    private void setRobotPos(int x, int y){
+    public void setRobotPos(int x, int y){
         robotPos[0] = x;
         robotPos[1] = y;
         if(robotPos[0] < 0){
@@ -202,5 +255,21 @@ public class MapCanvasView extends View {
         robotDirection = robotDirection % 4;
 //        Log.d(TAG, "robotRotate: direction: " + robotDirection);
         reDraw();
+    }
+
+    public void setRobotDirection(int direction){
+        robotDirection = direction;
+    }
+
+    public void setMap(int[][] mapMatrix){
+        map = mapMatrix;
+    }
+
+    public void update(){
+        reDraw();
+    }
+
+    public void setMapTouchable(boolean touchable){
+        this.mapTouchable = touchable;
     }
 }

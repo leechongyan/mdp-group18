@@ -1,159 +1,267 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".fragments.ControlFragment">
-
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ntu.mdp.grp18.MapCanvasView
-            android:id="@+id/map"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="#ffffff"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintDimensionRatio="H,3:4"/>
-
-    </android.support.constraint.ConstraintLayout>
+    android:layout_width="match_parent"
+    android:fillViewport="true">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".fragments.ControlFragment">
 
-        <ImageButton
-            android:id="@+id/turn_left_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/rotatearrow"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/fwd_btn"
-            android:scaleType="center"
-            android:scaleX="-1" />
 
-        <ImageButton
-            android:id="@+id/turn_right_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_below="@+id/fwd_btn"
-            android:layout_toEndOf="@+id/fwd_btn"
-            android:background="@drawable/rotatearrow"/>
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/map_container"
+            android:layout_marginEnd="150dp">
 
-        <ImageButton
-            android:id="@+id/fwd_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/abovearrow"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@id/turn_left_btn"/>
+            <ntu.mdp.grp18.MapCanvasView
+                android:id="@+id/map"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="#ffffff"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintDimensionRatio="H,3:4" />
+
+        </android.support.constraint.ConstraintLayout>
+
+
+        <LinearLayout
+            android:id="@+id/control_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_below="@+id/map_container">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="0dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/exploration_btn"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_button"
+                    android:layout_marginStart="1dp"
+                    android:text="E"/>
+
+                <Button
+                    android:id="@+id/shortest_path_btn"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_button"
+                    android:text="S"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <Button
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_button"
+                    android:text="Auto"/>
+
+                <Button
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_button"
+                    android:text="SP"/>
+
+                <ToggleButton
+                    android:id="@+id/set_wp_btn"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_button"
+                    android:textOn="Confirm WP"
+                    android:textOff="WP"/>
+
+                <Button
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_button"
+                    android:layout_marginEnd="1dp"
+                    android:text="Robot"/>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/control_buttons"
+            android:background="#999999"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="I D L E "
+                android:textSize="20sp"
+                android:textAlignment="gravity"
+                android:gravity="center"
+                android:textColor="#ffffff"
+                android:background="#333333"
+                android:layout_marginVertical="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="5dp"/>
+
+            <LinearLayout
+                android:id="@+id/control_panel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/turn_left_btn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/rotatearrow"
+                    android:scaleType="center"
+                    android:layout_marginHorizontal="10dp"
+                    android:scaleX="-1"
+                    android:layout_gravity="center_vertical"/>
+
+                <ImageButton
+                    android:id="@+id/fwd_btn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/abovearrow"
+                    android:layout_marginHorizontal="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_gravity="center_vertical"/>
+
+                <ImageButton
+                    android:id="@+id/turn_right_btn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/rotatearrow"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/tv_status"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginTop="8dp"-->
+        <!--        android:layout_marginEnd="471dp"-->
+        <!--        android:text="Robot status"-->
+        <!--        android:textSize="15dp"-->
+        <!--        android:textStyle="bold" />-->
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/tv_mystatus"-->
+        <!--        android:layout_width="147dp"-->
+        <!--        android:layout_height="45dp"-->
+        <!--        android:layout_marginTop="20dp"-->
+        <!--        android:layout_marginEnd="416dp"-->
+        <!--        android:background="@drawable/textbar"-->
+        <!--        android:ems="15"-->
+        <!--        android:gravity="bottom"-->
+        <!--        android:scrollbars="vertical"-->
+        <!--        android:text="" />-->
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/tv_map_exploration"-->
+        <!--        android:layout_width="132dp"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginTop="8dp"-->
+        <!--        android:layout_marginEnd="269dp"-->
+        <!--        android:text="String Commands"-->
+        <!--        android:textSize="15dp"-->
+        <!--        android:textStyle="bold" />-->
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/tv_mystringcmd"-->
+        <!--        android:layout_width="385dp"-->
+        <!--        android:layout_height="168dp"-->
+        <!--        android:layout_marginTop="7dp"-->
+        <!--        android:layout_marginEnd="15dp"-->
+        <!--        android:background="@drawable/textbar"-->
+        <!--        android:ems="15"-->
+        <!--        android:gravity="bottom"-->
+        <!--        android:scrollbars="vertical"-->
+        <!--        android:text="" />-->
+
+        <!--    <ToggleButton-->
+        <!--        android:id="@+id/tb_setStartCoord"-->
+        <!--        android:layout_width="100dp"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginStart="22dp"-->
+        <!--        android:layout_marginTop="35dp"-->
+        <!--        android:textOff="setStart"-->
+        <!--        android:textOn="onStart"-->
+        <!--        android:textSize="14dp" />-->
+
+
+        <!--    <ToggleButton-->
+        <!--        android:id="@+id/tb_setWaypointCoord"-->
+        <!--        android:layout_width="100dp"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginStart="22dp"-->
+        <!--        android:layout_marginTop="14dp"-->
+        <!--        android:textOff="setWaypoint"-->
+        <!--        android:textOn="onWaypoint"-->
+        <!--        android:textSize="14dp" />-->
+
+        <!--    <ToggleButton-->
+        <!--        android:id="@+id/tb_fastestpath"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="44dp"-->
+        <!--        android:layout_marginStart="24dp"-->
+        <!--        android:layout_marginTop="10dp"-->
+        <!--        android:layout_marginEnd="26dp"-->
+        <!--        android:textOff="Fastest"-->
+        <!--        android:textOn="Stop"-->
+        <!--        android:textSize="14dp" />-->
+
+        <!--    <ToggleButton-->
+        <!--        android:id="@+id/tb_exploration"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginTop="15dp"-->
+        <!--        android:layout_marginEnd="31dp"-->
+        <!--        android:textOff="Explore"-->
+        <!--        android:textOn="Stop"-->
+        <!--        android:textSize="14dp" />-->
+
+        <!--    <ToggleButton-->
+        <!--        android:id="@+id/tb_autoManual"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="43dp"-->
+        <!--        android:layout_marginTop="15dp"-->
+        <!--        android:layout_marginStart="28dp"-->
+        <!--        android:layout_marginEnd="31dp"-->
+        <!--        android:textOff="Auto"-->
+        <!--        android:textOn="Manual"-->
+        <!--        android:textSize="14dp" />-->
+
 
     </RelativeLayout>
 
-
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="471dp"
-        android:text="Robot status"
-        android:textSize="15dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/tv_mystatus"
-        android:layout_width="147dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="416dp"
-        android:background="@drawable/textbar"
-        android:ems="15"
-        android:gravity="bottom"
-        android:scrollbars="vertical"
-        android:text="" />
-
-    <TextView
-        android:id="@+id/tv_map_exploration"
-        android:layout_width="132dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="269dp"
-        android:text="String Commands"
-        android:textSize="15dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/tv_mystringcmd"
-        android:layout_width="385dp"
-        android:layout_height="168dp"
-        android:layout_marginTop="7dp"
-        android:layout_marginEnd="15dp"
-        android:background="@drawable/textbar"
-        android:ems="15"
-        android:gravity="bottom"
-        android:scrollbars="vertical"
-        android:text="" />
-
-    <ToggleButton
-        android:id="@+id/tb_setStartCoord"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="22dp"
-        android:layout_marginTop="35dp"
-        android:textOff="setStart"
-        android:textOn="onStart"
-        android:textSize="14dp" />
-
-
-    <ToggleButton
-        android:id="@+id/tb_setWaypointCoord"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="22dp"
-        android:layout_marginTop="14dp"
-        android:textOff="setWaypoint"
-        android:textOn="onWaypoint"
-        android:textSize="14dp" />
-
-    <ToggleButton
-        android:id="@+id/tb_fastestpath"
-        android:layout_width="wrap_content"
-        android:layout_height="44dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="26dp"
-        android:textOff="Fastest"
-        android:textOn="Stop"
-        android:textSize="14dp" />
-
-    <ToggleButton
-        android:id="@+id/tb_exploration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="31dp"
-        android:textOff="Explore"
-        android:textOn="Stop"
-        android:textSize="14dp" />
-
-    <ToggleButton
-        android:id="@+id/tb_autoManual"
-        android:layout_width="wrap_content"
-        android:layout_height="43dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginEnd="31dp"
-        android:textOff="Auto"
-        android:textOn="Manual"
-        android:textSize="14dp" />
-
-
-</LinearLayout>
+</ScrollView>

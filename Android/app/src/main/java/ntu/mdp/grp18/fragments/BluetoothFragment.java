@@ -87,6 +87,9 @@ public class BluetoothFragment extends Fragment implements OnBluetoothServiceBou
         }
         if(isBluetoothOn){
             onBluetoothOn(getView());
+            if(bluetoothConnectionState == BluetoothService.STATE_CONNECTED){
+                setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_CONNECTED);
+            }
         }
         else{
             onBluetoothOff(getView());
@@ -273,23 +276,13 @@ public class BluetoothFragment extends Fragment implements OnBluetoothServiceBou
             switch (bluetoothState){
                 case BluetoothService.STATE_CONNECTED:
                     setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_CONNECTED);
-                    Log.d(TAG, "onReceive: " + device.getName() + " connected");
-                    //test
-                    Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " connected", Toast.LENGTH_LONG).show();
                     break;
                 case BluetoothService.STATE_DISCONNECTED:
                     setVisibilitiesWithBluetoothState(getView(), BluetoothAdapter.STATE_DISCONNECTED);
-                    Log.d(TAG, "onReceive: " + device.getName() + " disconnected");
-                    //test
-                    Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " disconnected", Toast.LENGTH_LONG).show();
                     break;
                 case BluetoothService.STATE_RECONNECTING:
-                    //test
-                    Log.d(TAG, "onReceive: " + device.getName() + " reconnecting");
-                    Toast.makeText(getContext(), device.getName() + ": " + device.getAddress() + " reconnecting", Toast.LENGTH_LONG).show();
-                    break;
                 default:
-                    Log.d(TAG, "onReceive: bluetooth connection change: ERROR");
+                    break;
             }
         }
     };
