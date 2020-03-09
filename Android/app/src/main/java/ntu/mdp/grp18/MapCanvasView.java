@@ -15,15 +15,17 @@ import android.view.View;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import ntu.mdp.grp18.fragments.ControlFragment;
+
 public class MapCanvasView extends View {
 
     final String TAG = "MapCanvasView";
 
-    Paint mapPaintSpace, mapPaintWall, mapPaintUnknown, mapPaintWP;
+    Paint mapPaintSpace, mapPaintWall, mapPaintUnknown, mapPaintWP, mapPaintStartingZone;
 
-    public static int[][] map;
-    public static int[] robotPos;
-    public static int[] wpPos;
+    public int[][] map;
+    public int[] robotPos;
+    public int[] wpPos;
 
     int robotDirection;
     public static final int DIRECTION_FRONT = 0;
@@ -52,8 +54,11 @@ public class MapCanvasView extends View {
     public static final int BLANK = 2;
     public static final int OBSTACLE = 3;
     public static final int WP = 4;
+    public static final int STARTING_ZONE = 5;
+    public static final int GOAL_ZONE = 6;
 
     public boolean mapTouchable = false;
+    int touchMode = ControlFragment.MODE_DEFAULT;
 
     public MapCanvasView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -69,7 +74,6 @@ public class MapCanvasView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         drawMap(canvas);
         drawRobot(canvas);
     }
@@ -86,12 +90,11 @@ public class MapCanvasView extends View {
 
         //init wp
         wpPos = new int[2];
-        wpPos[0] = -1;
-        wpPos[1] = -1;
+        setWpPos(-1, -1);
 
         mapPaintSpace = new Paint();
         mapPaintSpace.setStyle(Paint.Style.FILL_AND_STROKE);
-        mapPaintSpace.setColor(Color.BLUE);
+        mapPaintSpace.setColor(0xffcccccc);
         mapPaintSpace.setStrokeWidth(4);
 
         mapPaintWall = new Paint();
@@ -109,6 +112,10 @@ public class MapCanvasView extends View {
         mapPaintWP.setColor(Color.GREEN);
         mapPaintWP.setStrokeWidth(4);
 
+        mapPaintStartingZone = new Paint();
+        mapPaintStartingZone.setStyle(Paint.Style.FILL_AND_STROKE);
+        mapPaintStartingZone.setColor(Color.BLUE);
+        mapPaintStartingZone.setStrokeWidth(4);
     }
 
     private void initRobot(){
@@ -141,18 +148,23 @@ public class MapCanvasView extends View {
     }
 
     private void onUnitSelect(int[] unit){
-        if(map[unit[0]][unit[1]] == BLANK || map[unit[0]][unit[1]] == UNEXPLORED){
-            map[unit[0]][unit[1]] = WP;
-            if(wpPos[0] != -1){
-                map[wpPos[0]][wpPos[1]] = UNEXPLORED;
-            }
-            wpPos[0] = unit[0];
-            wpPos[1] = unit[1];
-        }
-        else if(map[unit[0]][unit[1]] == WP){
-            map[wpPos[0]][wpPos[1]] = UNEXPLORED;
-            wpPos[0] = -1;
-            wpPos[1] = -1;
+        switch (touchMode){
+            case ControlFragment.MODE_SET_WP:
+                if(map[unit[0]][unit[1]] == BLANK || map[unit[0]][unit[1]] == UNEXPLORED){
+                    map[unit[0]][unit[1]] = WP;
+                    if(wpPos[0] != -1){
+                        map[wpPos[0]][wpPos[1]] = UNEXPLORED;
+                    }
+                    setWpPos(unit[0], unit[1]);
+                }
+                else if(map[unit[0]][unit[1]] == WP){
+                    map[wpPos[0]][wpPos[1]] = UNEXPLORED;
+                    setWpPos(-1, -1);
+                }
+                break;
+            case ControlFragment.MODE_SET_ROBOT:
+                setRobotPos(unit[0]-1, unit[1]-1);
+                break;
         }
         reDraw();
     }
@@ -163,6 +175,17 @@ public class MapCanvasView extends View {
         unitEdge = getMeasuredWidth() / NUMBER_OF_UNIT_ON_X;
 
         Log.d(TAG, "drawMap: unit edge = " + unitEdge + " measuredWidth = " + getMeasuredWidth());
+
+        //set waypoint
+        setWpPos(wpPos[0], wpPos[1]);
+
+        //set starting zone and goal zone
+        for(int i=0; i<3; i++){
+            for(int j=0; j<3; j++){
+                map[i][NUMBER_OF_UNIT_ON_Y - 1 - j] = STARTING_ZONE;
+                map[NUMBER_OF_UNIT_ON_X - 1 - i][j] = GOAL_ZONE;
+            }
+        }
 
         for(int i=0; i<NUMBER_OF_UNIT_ON_X; i++){
             for(int j=0; j<NUMBER_OF_UNIT_ON_Y; j++){
@@ -175,6 +198,10 @@ public class MapCanvasView extends View {
                         break;
                     case WP:
                         unitPaint = mapPaintWP;
+                        break;
+                    case STARTING_ZONE:
+                    case GOAL_ZONE:
+                        unitPaint = mapPaintStartingZone;
                         break;
                     default:
                         unitPaint = mapPaintUnknown;
@@ -198,7 +225,7 @@ public class MapCanvasView extends View {
         canvas.drawBitmap(robotBitmap, matrix, null);
     }
 
-    protected void reDraw() {
+    public void reDraw() {
         this.invalidate();
     }
 
@@ -206,7 +233,7 @@ public class MapCanvasView extends View {
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(0xddffff00);
+        canvas.drawColor(0xaaffff00);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
 
@@ -265,11 +292,25 @@ public class MapCanvasView extends View {
         map = mapMatrix;
     }
 
-    public void update(){
-        reDraw();
+    public void setWpPos(int x, int y){
+        wpPos[0] = x;
+        wpPos[1] = y;
     }
 
     public void setMapTouchable(boolean touchable){
         this.mapTouchable = touchable;
+    }
+
+    public void setTouchMode(int mode){
+        this.touchMode = mode;
+    }
+
+    public void fetchMap(MapCanvasView mapCanvasView){
+        if(mapCanvasView != null){
+            setMap(mapCanvasView.map);
+            setRobotDirection(mapCanvasView.robotDirection);
+            setRobotPos(mapCanvasView.robotPos[0], mapCanvasView.robotPos[1]);
+            setWpPos(mapCanvasView.wpPos[0], mapCanvasView.wpPos[1]);
+        }
     }
 }

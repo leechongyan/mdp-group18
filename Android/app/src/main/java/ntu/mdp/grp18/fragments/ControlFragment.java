@@ -33,10 +33,12 @@ public class ControlFragment extends Fragment{
 
     final String TAG = "ControlFragment";
 
-    int mode;
+    static MapCanvasView mapCanvasView;
 
-    final int MODE_SET_WP = 0;
-    final int MODE_DEFAULT = 1;
+    int mode;
+    public static final int MODE_SET_WP = 0;
+    public static final int MODE_DEFAULT = 1;
+    public static final int MODE_SET_ROBOT = 2;
 
     final int COMMAND_FORWARD = 0;
     final int COMMAND_TURN_LEFT = 1;
@@ -44,6 +46,9 @@ public class ControlFragment extends Fragment{
     final int COMMAND_START_EXPLORATION = 3;
     final int COMMAND_START_SHORTEST_PATH = 4;
     final int COMMAND_SET_WEIGH_POINT = 5;
+    final int COMMAND_SET_ROBOT = 6;
+
+    boolean isMapAutoUpdate = true;
 
     @Nullable
     @Override
@@ -65,6 +70,8 @@ public class ControlFragment extends Fragment{
 
         IntentFilter messageReceiveFilter = new IntentFilter(BluetoothService.ACTION_BLUETOOTH_MESSAGE_RECEIVED);
         getActivity().registerReceiver(btMessageReceiver, messageReceiveFilter);
+
+        fetchMap();
     }
 
     @Override
@@ -72,10 +79,12 @@ public class ControlFragment extends Fragment{
         super.onPause();
 
         getActivity().unregisterReceiver(btMessageReceiver);
+
+        storeMap();
     }
 
     private void initControlBtns(){
-        final MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+//        final MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
 
 //        ImageButton fwdBtn = getView().findViewById(R.id.fwd_btn);
 //        fwdBtn.setOnClickListener(new View.OnClickListener() {
@@ -115,7 +124,7 @@ public class ControlFragment extends Fragment{
             }
         });
 
-        Button shortestBtn = getView().findViewById(R.id.shortest_path_btn);
+        Button shortestBtn = getView().findViewById(R.id.fastest_path_btn);
         shortestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,10 +146,41 @@ public class ControlFragment extends Fragment{
             }
         });
 
+        ToggleButton setRobotBtn = getView().findViewById(R.id.set_robot_btn);
+        setRobotBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    setMode(MODE_SET_ROBOT);
+                }
+                else{
+                    setMode(MODE_DEFAULT);
+                    sendBluetoothCommand(COMMAND_SET_ROBOT);
+                }
+            }
+        });
+
+        ToggleButton autoManualUpdateMapBtn = getView().findViewById(R.id.auto_manual_update_btn);
+        autoManualUpdateMapBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                switchMapUpdateMode(isChecked);
+            }
+        });
+
+        Button updateMapBtn = getView().findViewById(R.id.update_map_btn);
+        updateMapBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+                mapCanvasView.reDraw();
+            }
+        });
     }
 
     private boolean sendBluetoothCommand(int command){
         SharedPreferences sharedPref = getActivity().getSharedPreferences("commandSettings", Context.MODE_PRIVATE);
+        MapCanvasView mapCanvasView;
         String defaultValue, commandValue = null, prefix = null;
         switch (command){
             case COMMAND_FORWARD:
@@ -170,7 +210,16 @@ public class ControlFragment extends Fragment{
             case COMMAND_SET_WEIGH_POINT:
                 prefix = sharedPref.getString(getResources().getString(R.string.pref_pc_prefix_key), null);
                 prefix += sharedPref.getString(getResources().getString(R.string.pref_wp_prefix_key), null);
-                int[] unit = translateCoordinateForPc(MapCanvasView.wpPos[0], MapCanvasView.wpPos[1]);
+                mapCanvasView = getView().findViewById(R.id.map);
+                int[] unit = translateCoordinateForPc(mapCanvasView.wpPos[0], mapCanvasView.wpPos[1]);
+                commandValue = unit[0] + " " + unit[1];
+                commandValue = prefix + commandValue;
+                break;
+            case COMMAND_SET_ROBOT:
+                prefix = sharedPref.getString(getResources().getString(R.string.pref_pc_prefix_key), null);
+                prefix += "rp";
+                mapCanvasView = getView().findViewById(R.id.map);
+                unit = translateCoordinateForPc(mapCanvasView.robotPos[0]+1, mapCanvasView.robotPos[1]+1);
                 commandValue = unit[0] + " " + unit[1];
                 commandValue = prefix + commandValue;
                 break;
@@ -242,14 +291,14 @@ public class ControlFragment extends Fragment{
         //map
         int[][] mapMatrix = MapDecoder.convertToMap(splitData[0], splitData[1]);
 
-        int[][] mapMatrix2 = new int[15][20];
+        int[][] mapMatrixFlipped = new int[15][20];
         for(int j=0; j<mapMatrix[0].length; j++){
             for(int i=0; i<mapMatrix.length; i++){
-                mapMatrix2[j][i] = mapMatrix[i][j];
+                mapMatrixFlipped[j][i] = mapMatrix[i][j];
             }
         }
 
-        mapCanvasView.setMap(mapMatrix2);
+        mapCanvasView.setMap(mapMatrixFlipped);
 
 //        for(int j=0; j<mapMatrix2[0].length; j++){
 //            String row = "";
@@ -260,7 +309,9 @@ public class ControlFragment extends Fragment{
 //        }
 
         //redraw
-        mapCanvasView.update();
+        if(isMapAutoUpdate){
+            mapCanvasView.reDraw();
+        }
     }
 
     private void setMode(int mode){
@@ -268,17 +319,20 @@ public class ControlFragment extends Fragment{
 
         switch (mode){
             case MODE_SET_WP:
+            case MODE_SET_ROBOT:
                 //todo disable other buttons
-                setMapTouchable(true);
+                setMapTouchable(true, mode);
                 break;
             case MODE_DEFAULT:
-                setMapTouchable(false);
+                setMapTouchable(false, mode);
+                break;
         }
     }
 
-    private void setMapTouchable(boolean touchable){
+    private void setMapTouchable(boolean touchable, int mode){
         MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
         mapCanvasView.setMapTouchable(touchable);
+        mapCanvasView.setTouchMode(mode);
     }
 
     private int[] translateCoordinateForPc(int x, int y){
@@ -290,4 +344,29 @@ public class ControlFragment extends Fragment{
         unit[1] = x;
         return unit;
     }
+
+    private void storeMap(){
+        MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+        ControlFragment.mapCanvasView = mapCanvasView;
+    }
+
+    private void fetchMap(){
+        MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+        mapCanvasView.fetchMap(ControlFragment.mapCanvasView);
+    }
+
+    private void switchMapUpdateMode(boolean isManual){
+        Button updateMapBtn = getView().findViewById(R.id.update_map_btn);
+        if(isManual){
+            updateMapBtn.setClickable(true);
+            updateMapBtn.setBackground(getResources().getDrawable(R.drawable.rounded_button));
+            isMapAutoUpdate = false;
+        }
+        else{
+            updateMapBtn.setClickable(false);
+            updateMapBtn.setBackground(getResources().getDrawable(R.drawable.rounded_button_unclickable));
+            isMapAutoUpdate = true;
+        }
+    }
+
 }

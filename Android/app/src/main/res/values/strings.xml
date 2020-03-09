@@ -44,8 +44,11 @@
     <string name="pref_pc_prefix_default">md</string>
     <string name="pref_pc_prefix_key">PREF_PC_PREFIX</string>
 
-    <string name="pref_wp_prefix_title">Wp Prefix</string>
+    <string name="pref_wp_prefix_title">Waypoint Prefix</string>
     <string name="pref_wp_prefix_key">PREF_WP_PREFIX</string>
+
+    <string name="pref_img_prefix_title">Image Prefix</string>
+    <string name="pref_img_prefix_key">PREF_IMG_PREFIX</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

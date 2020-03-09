@@ -31,6 +31,20 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/map_container"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="-150dp"
+            android:layout_toEndOf="@+id/map_container"
+            android:text="P1: P2: Image:"
+            android:textSize="20sp"
+            android:textColor="#ffffff"
+            android:background="#666666"
+            android:layout_marginEnd="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"/>
 
         <LinearLayout
             android:id="@+id/control_buttons"
@@ -55,12 +69,13 @@
                     android:text="E"/>
 
                 <Button
-                    android:id="@+id/shortest_path_btn"
+                    android:id="@+id/fastest_path_btn"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/rounded_button"
-                    android:text="S"/>
+                    android:layout_marginEnd="1dp"
+                    android:text="F"/>
 
             </LinearLayout>
 
@@ -69,19 +84,23 @@
                 android:layout_height="0dp"
                 android:layout_weight="1">
 
-                <Button
+                <ToggleButton
+                    android:id="@+id/auto_manual_update_btn"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/rounded_button"
-                    android:text="Auto"/>
+                    android:textOff="Auto"
+                    android:textOn="Manual"/>
 
                 <Button
+                    android:id="@+id/update_map_btn"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:background="@drawable/rounded_button"
-                    android:text="SP"/>
+                    android:background="@drawable/rounded_button_unclickable"
+                    android:text="Update"
+                    android:clickable="false"/>
 
                 <ToggleButton
                     android:id="@+id/set_wp_btn"
@@ -92,13 +111,15 @@
                     android:textOn="Confirm WP"
                     android:textOff="WP"/>
 
-                <Button
+                <ToggleButton
+                    android:id="@+id/set_robot_btn"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/rounded_button"
                     android:layout_marginEnd="1dp"
-                    android:text="Robot"/>
+                    android:textOn="Confirm robot"
+                    android:textOff="Robot"/>
 
 
             </LinearLayout>
@@ -109,7 +130,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/control_buttons"
-            android:background="#999999"
+            android:background="#666666"
             android:visibility="gone">
 
             <TextView
