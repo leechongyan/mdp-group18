@@ -255,11 +255,16 @@ public class ControlFragment extends Fragment{
             String data = intent.getStringExtra(BluetoothService.EXTRA_MESSAGE);
             String mapDescriptorPrefix = sharedPref.getString(getResources().getString(R.string.pref_map_descriptor_prefix_key), "md");
             String imgPrefix = sharedPref.getString(getResources().getString(R.string.pref_img_prefix_key), "img");
+            if(mapDescriptorPrefix == null || imgPrefix.length() == 0){
+                mapDescriptorPrefix = "md";
+            }
+            if(imgPrefix == null || imgPrefix.length() == 0){
+                imgPrefix = "img";
+            }
             if(data.startsWith(mapDescriptorPrefix)){
                     processMapAndRobotDescriptorString(data.substring(mapDescriptorPrefix.length()));
             }
             else if(data.startsWith(imgPrefix)){
-                Log.d(TAG, "onReceive: " + data);
                 processImageString(data.substring((imgPrefix.length())));
             }
         }

@@ -70,6 +70,9 @@ public class DriveFragment extends Fragment implements SensorEventListener {
             SharedPreferences sharedPref = getActivity().getSharedPreferences("commandSettings", Context.MODE_PRIVATE);
             String data = intent.getStringExtra(BluetoothService.EXTRA_MESSAGE);
             String robotStatePrefix = sharedPref.getString(getResources().getString(R.string.pref_robot_state_prefix_key), "rs");
+            if(robotStatePrefix == null || robotStatePrefix.length() == 0){
+                robotStatePrefix = "rs";
+            }
             if(data.startsWith(robotStatePrefix)){
                 setRobotState(data.substring(robotStatePrefix.length()));
             }
