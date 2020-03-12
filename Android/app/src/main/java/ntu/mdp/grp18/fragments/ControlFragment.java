@@ -18,8 +18,11 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import org.w3c.dom.Text;
 
 import java.util.Map;
 
@@ -49,6 +52,8 @@ public class ControlFragment extends Fragment{
     final int COMMAND_SET_ROBOT = 6;
 
     boolean isMapAutoUpdate = true;
+
+    String P1 = "", P2 = "", ImageString = "";
 
     @Nullable
     @Override
@@ -116,13 +121,23 @@ public class ControlFragment extends Fragment{
 //            }
 //        });
 
-        Button explorationBtn = getView().findViewById(R.id.exploration_btn);
+        final Button explorationBtn = getView().findViewById(R.id.exploration_btn);
         explorationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendBluetoothCommand(COMMAND_START_EXPLORATION);
                 MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
                 mapCanvasView.clear();
+                P1 = "";
+                P2 = "";
+                ImageString = "";
+                updateMapDescriptorText();
+
+                SharedPreferences sharedPref = getActivity().getSharedPreferences("commandSettings", Context.MODE_PRIVATE);
+                String debuggingModeOn = sharedPref.getString(getResources().getString(R.string.pref_debugging_mode_key), "true");
+                if(debuggingModeOn.equalsIgnoreCase("false")){
+                    explorationBtn.setClickable(false);
+                }
             }
         });
 
@@ -303,6 +318,9 @@ public class ControlFragment extends Fragment{
         mapCanvasView.setRobotDirection(direction);
 
         //map
+        P1 = splitData[0];
+        P2 = splitData[1];
+        updateMapDescriptorText();
         int[][] mapMatrix = MapDecoder.convertToMap(splitData[0], splitData[1]);
 
         int[][] mapMatrixFlipped = new int[15][20];
@@ -389,9 +407,17 @@ public class ControlFragment extends Fragment{
         for(int i=0; i<3; i++){
             imageInfo[i] = Integer.parseInt(imageStringSplit[i]);
         }
+        this.ImageString += ("\n" + imageInfo[0] + ": (" + imageInfo[1] + "," + imageInfo[2] + ")");
+        updateMapDescriptorText();
         MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
         mapCanvasView.setImagePos(imageInfo[0], imageInfo[2], MapCanvasView.NUMBER_OF_UNIT_ON_Y - 1 - imageInfo[1]);
         mapCanvasView.reDraw();
+    }
+
+    private void updateMapDescriptorText(){
+        TextView mapDescriptorTextView = getView().findViewById(R.id.map_descriptor_text_view);
+        String text = "P1: \n" + P1 + "\nP2: \n" + P2 + "\nImage: " + ImageString;
+        mapDescriptorTextView.setText(text);
     }
 
 }

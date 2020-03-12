@@ -5,15 +5,10 @@
 
     <android.support.v7.preference.PreferenceCategory android:title="@string/pref_direction_change" >
         <android.support.v7.preference.EditTextPreference
-            android:title="@string/pref_strafe_left"
-            android:summary="@string/pref_strafe_left_default"
-            android:defaultValue="@string/pref_strafe_left_default"
-            android:key="prefstrafeleft"/>
-        <android.support.v7.preference.EditTextPreference
-            android:title="@string/pref_strafe_right"
-            android:summary="@string/pref_strafe_right_default"
-            android:defaultValue="@string/pref_strafe_right_default"
-            android:key="prefstraferight"/>
+            android:title="Debugging Mode"
+            android:summary=""
+            android:defaultValue="true"
+            android:key="@string/pref_debugging_mode_key"/>
         <android.support.v7.preference.EditTextPreference
             android:title="@string/pref_forward"
             android:summary="@string/pref_forward_default"

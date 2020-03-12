@@ -53,6 +53,8 @@
     <string name="pref_arduino_prefix_title">Arduino Prefix</string>
     <string name="pref_arduino_prefix_key">PREF_ARDUINO_PREFIX</string>
 
+    <string name="pref_debugging_mode_key">DEBUGGING_MODE</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
