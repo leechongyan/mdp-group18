@@ -2,10 +2,12 @@ package ntu.mdp.grp18;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -14,6 +16,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Switch;
 import android.widget.Toast;
+
+import java.lang.reflect.Field;
 
 import ntu.mdp.grp18.fragments.ControlFragment;
 
@@ -26,6 +30,7 @@ public class MapCanvasView extends View {
     public int[][] map;
     public int[] robotPos;
     public int[] wpPos;
+    public int[][] imagePos;
 
     int robotDirection;
     public static final int DIRECTION_FRONT = 0;
@@ -39,6 +44,7 @@ public class MapCanvasView extends View {
 
     Bitmap robotBitmap;
     Drawable robotDrawable;
+    Bitmap[] imageBitmaps;
 
     int unitEdge;
 
@@ -53,12 +59,13 @@ public class MapCanvasView extends View {
     public static final int UNEXPLORED = 0;
     public static final int BLANK = 2;
     public static final int OBSTACLE = 3;
-    public static final int WP = 4;
     public static final int STARTING_ZONE = 5;
     public static final int GOAL_ZONE = 6;
 
     public boolean mapTouchable = false;
     int touchMode = ControlFragment.MODE_DEFAULT;
+
+    final int offset = 5;
 
     public MapCanvasView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -67,14 +74,17 @@ public class MapCanvasView extends View {
 
     private void init() {
         initMap();
-
+        initWp();
         initRobot();
+        initImage();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawMap(canvas);
+        drawWp(canvas);
+        drawImage(canvas);
         drawRobot(canvas);
     }
 
@@ -87,10 +97,6 @@ public class MapCanvasView extends View {
                 map[i][j] = UNEXPLORED;
             }
         }
-
-        //init wp
-        wpPos = new int[2];
-        setWpPos(-1, -1);
 
         mapPaintSpace = new Paint();
         mapPaintSpace.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -107,15 +113,21 @@ public class MapCanvasView extends View {
         mapPaintUnknown.setColor(Color.GRAY);
         mapPaintUnknown.setStrokeWidth(4);
 
-        mapPaintWP = new Paint();
-        mapPaintWP.setStyle(Paint.Style.FILL_AND_STROKE);
-        mapPaintWP.setColor(Color.GREEN);
-        mapPaintWP.setStrokeWidth(4);
-
         mapPaintStartingZone = new Paint();
         mapPaintStartingZone.setStyle(Paint.Style.FILL_AND_STROKE);
         mapPaintStartingZone.setColor(Color.BLUE);
         mapPaintStartingZone.setStrokeWidth(4);
+    }
+
+    private void initWp(){
+        //init wp
+        wpPos = new int[2];
+        setWpPos(-1, -1);
+
+        mapPaintWP = new Paint();
+        mapPaintWP.setStyle(Paint.Style.FILL_AND_STROKE);
+        mapPaintWP.setColor(Color.GREEN);
+        mapPaintWP.setStrokeWidth(4);
     }
 
     private void initRobot(){
@@ -126,6 +138,20 @@ public class MapCanvasView extends View {
         robotDrawable = getResources().getDrawable(R.drawable.ic_forward_black_24dp, null);
         robotBitmap = getRobotBitmapFromDrawable(robotDrawable);
         robotDirection = DIRECTION_FRONT;
+    }
+
+    private void initImage(){
+        imagePos = new int[15][2];
+        for(int i=0; i<15; i++){
+            setImagePos(i, -1, -1);
+        }
+
+        imageBitmaps = new Bitmap[15];
+        for(int i=0; i<15; i++){
+            int resId = getResId("img_" + (i+1), R.drawable.class);
+            Drawable drawable = getResources().getDrawable(resId, null);
+            imageBitmaps[i] = ((BitmapDrawable) drawable).getBitmap();
+        }
     }
 
     @Override
@@ -150,16 +176,14 @@ public class MapCanvasView extends View {
     private void onUnitSelect(int[] unit){
         switch (touchMode){
             case ControlFragment.MODE_SET_WP:
-                if(map[unit[0]][unit[1]] == BLANK || map[unit[0]][unit[1]] == UNEXPLORED){
-                    map[unit[0]][unit[1]] = WP;
-                    if(wpPos[0] != -1){
-                        map[wpPos[0]][wpPos[1]] = UNEXPLORED;
-                    }
-                    setWpPos(unit[0], unit[1]);
+                if(map[unit[0]][unit[1]] == OBSTACLE){
+                    break;
                 }
-                else if(map[unit[0]][unit[1]] == WP){
-                    map[wpPos[0]][wpPos[1]] = UNEXPLORED;
+                if(unit[0] == wpPos[0] && unit[1] == wpPos[1]){
                     setWpPos(-1, -1);
+                }
+                else{
+                    setWpPos(unit[0], unit[1]);
                 }
                 break;
             case ControlFragment.MODE_SET_ROBOT:
@@ -170,7 +194,6 @@ public class MapCanvasView extends View {
     }
 
     private void drawMap(Canvas canvas){
-        int offset = 5;
         Paint unitPaint;
         unitEdge = getMeasuredWidth() / NUMBER_OF_UNIT_ON_X;
 
@@ -196,9 +219,6 @@ public class MapCanvasView extends View {
                     case BLANK:
                         unitPaint = mapPaintSpace;
                         break;
-                    case WP:
-                        unitPaint = mapPaintWP;
-                        break;
                     case STARTING_ZONE:
                     case GOAL_ZONE:
                         unitPaint = mapPaintStartingZone;
@@ -223,6 +243,23 @@ public class MapCanvasView extends View {
         matrix.postScale(3f * unitEdge / robotBitmap.getWidth(), 3f * unitEdge / robotBitmap.getHeight());
         matrix.postTranslate(unitEdge * robotPos[0], unitEdge * robotPos[1]);
         canvas.drawBitmap(robotBitmap, matrix, null);
+    }
+
+    private void drawImage(Canvas canvas){
+        for(int i=0; i<imagePos.length; i++){
+            if(imagePos[i][0] != -1){
+                Matrix matrix = new Matrix();
+                matrix.postScale(1f * (unitEdge - 2 * offset) / imageBitmaps[0].getWidth(), 1f * (unitEdge - 2 * offset) / imageBitmaps[0].getHeight());
+                matrix.postTranslate(unitEdge * imagePos[i][0] + offset, unitEdge * imagePos[i][1] + offset);
+                canvas.drawBitmap(imageBitmaps[i], matrix, null);
+            }
+        }
+    }
+
+    private void drawWp(Canvas canvas){
+        int x = wpPos[0] * unitEdge + offset;
+        int y = wpPos[1] * unitEdge + offset;
+        canvas.drawRect(x, y, x + unitEdge - 2 * offset, y + unitEdge - 2 * offset, mapPaintWP);
     }
 
     public void reDraw() {
@@ -297,6 +334,17 @@ public class MapCanvasView extends View {
         wpPos[1] = y;
     }
 
+    public void setImagePos(int index, int x, int y){
+        imagePos[index][0] = x;
+        imagePos[index][1] = y;
+    }
+
+    public void setImagePos(int[][] imagePos){
+        if(imagePos.length == this.imagePos.length && imagePos[0].length == this.imagePos[0].length){
+            this.imagePos = imagePos;
+        }
+    }
+
     public void setMapTouchable(boolean touchable){
         this.mapTouchable = touchable;
     }
@@ -311,6 +359,46 @@ public class MapCanvasView extends View {
             setRobotDirection(mapCanvasView.robotDirection);
             setRobotPos(mapCanvasView.robotPos[0], mapCanvasView.robotPos[1]);
             setWpPos(mapCanvasView.wpPos[0], mapCanvasView.wpPos[1]);
+            setImagePos(mapCanvasView.imagePos);
         }
     }
+
+    public void clear(){
+        clearMap();
+        clearImagePos();
+        reDraw();
+    }
+
+    private void clearMap(){
+        for(int i=0; i<NUMBER_OF_UNIT_ON_X; i++){
+            for(int j=0; j<NUMBER_OF_UNIT_ON_Y; j++){
+                map[i][j] = UNEXPLORED;
+            }
+        }
+    }
+
+    private void clearWpPos(){
+        setWpPos(-1, -1);
+    }
+
+    private void clearRobotPos(){
+        setRobotPos(0, NUMBER_OF_UNIT_ON_Y - 3);
+    }
+
+    private void clearImagePos(){
+        for(int i=0; i<imagePos.length; i++){
+            setImagePos(i, -1, -1);
+        }
+    }
+
+    public static int getResId(String resName, Class<?> c) {
+        try {
+            Field idField = c.getDeclaredField(resName);
+            return idField.getInt(idField);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
 }

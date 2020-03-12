@@ -121,6 +121,8 @@ public class ControlFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 sendBluetoothCommand(COMMAND_START_EXPLORATION);
+                MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+                mapCanvasView.clear();
             }
         });
 
@@ -249,16 +251,23 @@ public class ControlFragment extends Fragment{
     private final BroadcastReceiver btMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            SharedPreferences sharedPref = getActivity().getSharedPreferences("commandSettings", Context.MODE_PRIVATE);
             String data = intent.getStringExtra(BluetoothService.EXTRA_MESSAGE);
-            if(data.startsWith("md")){
-                processMapAndRobotDescriptorString(data.substring(2));
+            String mapDescriptorPrefix = sharedPref.getString(getResources().getString(R.string.pref_map_descriptor_prefix_key), "md");
+            String imgPrefix = sharedPref.getString(getResources().getString(R.string.pref_img_prefix_key), "img");
+            if(data.startsWith(mapDescriptorPrefix)){
+                    processMapAndRobotDescriptorString(data.substring(mapDescriptorPrefix.length()));
+            }
+            else if(data.startsWith(imgPrefix)){
+                Log.d(TAG, "onReceive: " + data);
+                processImageString(data.substring((imgPrefix.length())));
             }
         }
     };
 
     private void processMapAndRobotDescriptorString(String data){
         String[] splitData = data.split(" ");
-        final MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+        MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
 
         //robot position
         mapCanvasView.setRobotPos(Integer.parseInt(splitData[3]) - 1,MapCanvasView.NUMBER_OF_UNIT_ON_Y - Integer.parseInt(splitData[2]) - 1 - 1);
@@ -367,6 +376,17 @@ public class ControlFragment extends Fragment{
             updateMapBtn.setBackground(getResources().getDrawable(R.drawable.rounded_button_unclickable));
             isMapAutoUpdate = true;
         }
+    }
+
+    private void processImageString(String imageString){
+        String[] imageStringSplit = imageString.split(" ");
+        int[] imageInfo = new int[3];
+        for(int i=0; i<3; i++){
+            imageInfo[i] = Integer.parseInt(imageStringSplit[i]);
+        }
+        MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
+        mapCanvasView.setImagePos(imageInfo[0], imageInfo[2], MapCanvasView.NUMBER_OF_UNIT_ON_Y - 1 - imageInfo[1]);
+        mapCanvasView.reDraw();
     }
 
 }

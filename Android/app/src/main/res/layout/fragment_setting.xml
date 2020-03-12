@@ -85,6 +85,12 @@
             android:defaultValue=""
             android:key="@string/pref_img_prefix_key"/>
 
+        <android.support.v7.preference.EditTextPreference
+            android:title="@string/pref_arduino_prefix_title"
+            android:summary=""
+            android:defaultValue=""
+            android:key="@string/pref_arduino_prefix_key"/>
+
     </android.support.v7.preference.PreferenceCategory>
 
 </android.support.v7.preference.PreferenceScreen>

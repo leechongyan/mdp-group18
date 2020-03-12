@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.media.Image;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import ntu.mdp.grp18.fragments.BluetoothFragment;
 import ntu.mdp.grp18.fragments.ControlFragment;
+import ntu.mdp.grp18.fragments.DriveFragment;
 import ntu.mdp.grp18.fragments.OnBluetoothServiceBoundListener;
 import ntu.mdp.grp18.fragments.SettingsFragment;
 
@@ -30,12 +32,13 @@ public class MainActivity extends AppCompatActivity {
     BluetoothService btService;
     boolean btServiceBound = false;
 
-    Fragment bluetoothFragment, settingsFragment, controlFragment;
+    Fragment bluetoothFragment, settingsFragment, controlFragment, driveFragment;
 
     int currentPage;
     final int BLUETOOTH_PAGE = 0;
     final int SETTING_PAGE = 1;
     final int CONTROL_PAGE = 2;
+    final int DRIVE_PAGE = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +48,12 @@ public class MainActivity extends AppCompatActivity {
         ImageButton bluetoothPageBtn = findViewById(R.id.bluetooth_page_bottom_nav_btn);
         ImageButton settingPageBtn = findViewById(R.id.setting_page_bottom_nav_btn);
         ImageButton mapPageBtn = findViewById(R.id.map_page_bottom_nav_btn);
+        ImageButton drivePageBtn = findViewById(R.id.drive_page_bottom_nav_btn);
 
         bluetoothFragment = new BluetoothFragment();
         controlFragment = new ControlFragment();
         settingsFragment = new SettingsFragment();
+        driveFragment = new DriveFragment();
 
         bluetoothPageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +88,18 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, settingsFragment).commit();
                 setPageTitle("SETTINGS");
                 setCurrentPage(SETTING_PAGE);
+            }
+        });
+
+        drivePageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(currentPage == DRIVE_PAGE){
+                    return;
+                }
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, driveFragment).commit();
+                setPageTitle("DRIVE");
+                setCurrentPage(DRIVE_PAGE);
             }
         });
 
