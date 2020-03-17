@@ -77,6 +77,8 @@ public class ControlFragment extends Fragment{
         getActivity().registerReceiver(btMessageReceiver, messageReceiveFilter);
 
         fetchMap();
+
+        updateMapDescriptorText();
     }
 
     @Override
