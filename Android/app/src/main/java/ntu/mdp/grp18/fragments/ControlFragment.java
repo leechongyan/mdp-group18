@@ -53,7 +53,7 @@ public class ControlFragment extends Fragment{
 
     boolean isMapAutoUpdate = true;
 
-    String P1 = "", P2 = "", ImageString = "";
+    String P1 = "", P2 = "";
 
     @Nullable
     @Override
@@ -132,7 +132,6 @@ public class ControlFragment extends Fragment{
                 mapCanvasView.clear();
                 P1 = "";
                 P2 = "";
-                ImageString = "";
                 updateMapDescriptorText();
 
                 SharedPreferences sharedPref = getActivity().getSharedPreferences("commandSettings", Context.MODE_PRIVATE);
@@ -174,7 +173,7 @@ public class ControlFragment extends Fragment{
                 }
                 else{
                     setMode(MODE_DEFAULT);
-                    sendBluetoothCommand(COMMAND_SET_ROBOT);
+//                    sendBluetoothCommand(COMMAND_SET_ROBOT);
                 }
             }
         });
@@ -404,22 +403,166 @@ public class ControlFragment extends Fragment{
     }
 
     private void processImageString(String imageString){
-        String[] imageStringSplit = imageString.split(" ");
-        int[] imageInfo = new int[3];
-        for(int i=0; i<3; i++){
-            imageInfo[i] = Integer.parseInt(imageStringSplit[i]);
-        }
-        this.ImageString += ("\n" + imageInfo[0] + ": (" + imageInfo[1] + "," + imageInfo[2] + ")");
-        updateMapDescriptorText();
+        String[] imageStrings = imageString.split("\\|");
+        String[] imageStringSplit;
+
         MapCanvasView mapCanvasView = getView().findViewById(R.id.map);
-        mapCanvasView.setImagePos(imageInfo[0], imageInfo[2], MapCanvasView.NUMBER_OF_UNIT_ON_Y - 1 - imageInfo[1]);
+
+        int[] imageInfo;
+        for(int j=0; j<imageStrings.length; j++){
+            imageStringSplit = imageStrings[j].split(" ");
+
+            imageInfo = new int[3];
+
+            for(int i=0; i<3; i++){
+                Log.d(TAG, "imageStringSplit:" + imageStringSplit[i]);
+                imageInfo[i] = Integer.parseInt(imageStringSplit[i]);
+            }
+
+            mapCanvasView.setImagePos(imageInfo[0], imageInfo[2], MapCanvasView.NUMBER_OF_UNIT_ON_Y - 1 - imageInfo[1]);
+        }
+
+        adjustImagePosition();
+        updateMapDescriptorText();
         mapCanvasView.reDraw();
     }
 
     private void updateMapDescriptorText(){
+        String imageString = "";
+        mapCanvasView = getView().findViewById(R.id.map);
+        for(int i=0; i<15; i++){
+            if(mapCanvasView.imagePos[i][0] == -1){
+                continue;
+            }
+            String imageName;
+            switch(i){
+                case 0:
+                    imageName = "red_a";
+                    break;
+                case 1:
+                    imageName = "red_arrow";
+                    break;
+                case 2:
+                    imageName = "red_three";
+                    break;
+                case 3:
+                    imageName = "green_arrow";
+                    break;
+                case 4:
+                    imageName = "green_b";
+                    break;
+                case 5:
+                    imageName = "green_two";
+                    break;
+                case 6:
+                    imageName = "blue_arrow";
+                    break;
+                case 7:
+                    imageName = "blue_d";
+                    break;
+                case 8:
+                    imageName = "blue_one";
+                    break;
+                case 9:
+                    imageName = "white_arrow";
+                    break;
+                case 10:
+                    imageName = "white_c";
+                    break;
+                case 11:
+                    imageName = "white_four";
+                    break;
+                case 12:
+                    imageName = "yellow_circle";
+                    break;
+                case 13:
+                    imageName = "yellow_e";
+                    break;
+                case 14:
+                    imageName = "yellow_five";
+                    break;
+                default:
+                    imageName = "";
+                    break;
+
+            }
+
+            imageString += ("\n" + imageName + ": (" + mapCanvasView.imagePos[i][0] + "," + (mapCanvasView.NUMBER_OF_UNIT_ON_Y - 1 - mapCanvasView.imagePos[i][1]) + ")");
+
+        }
+
         TextView mapDescriptorTextView = getView().findViewById(R.id.map_descriptor_text_view);
-        String text = "P1: \n" + P1 + "\nP2: \n" + P2 + "\nImage: " + ImageString;
+        String text = "P1: \n" + P1 + "\nP2: \n" + P2 + "\nImage: " + imageString;
         mapDescriptorTextView.setText(text);
+    }
+
+    private void adjustImagePosition(){
+        mapCanvasView = getView().findViewById(R.id.map);
+        int[][] map = mapCanvasView.map;
+        int[][] imagePos = mapCanvasView.imagePos;
+
+        for(int i=0; i<imagePos.length; i++){
+            int x = imagePos[i][0];
+            int y = imagePos[i][1];
+
+            if(x == -1){
+                continue;
+            }
+
+            if(x < 0){
+                x = 0;
+            }
+
+            if(y < 0){
+                y = 0;
+            }
+
+            if(x > MapCanvasView.NUMBER_OF_UNIT_ON_X - 1){
+                x = MapCanvasView.NUMBER_OF_UNIT_ON_X - 1;
+            }
+
+            if(y > MapCanvasView.NUMBER_OF_UNIT_ON_Y - 1){
+                y = MapCanvasView.NUMBER_OF_UNIT_ON_Y - 1;
+            }
+
+            if(map[x][y] == MapCanvasView.OBSTACLE){
+                boolean hasOverlap = false;
+                for(int n=0; n<imagePos.length; n++){
+                    if(n == i){
+                        continue;
+                    }
+                    if(imagePos[n][0] == x && imagePos[n][1] == y){
+                        hasOverlap = true;
+                        break;
+                    }
+                }
+
+                if(!hasOverlap){
+                    continue;
+                }
+            }
+
+            for(int j=1; j<5; j++){
+                for(int px=x-j; px<=x+j; px++){
+                    if(px < 0 || px >= MapCanvasView.NUMBER_OF_UNIT_ON_X){
+                        continue;
+                    }
+                    for(int py=y-j; py<=y+j; py++) {
+                        if(py < 0 || py >= MapCanvasView.NUMBER_OF_UNIT_ON_Y){
+                            continue;
+                        }
+                        if(map[px][py] == MapCanvasView.OBSTACLE && !mapCanvasView.hasImage(px, py)){
+                            mapCanvasView.setImagePos(i, px, py);
+                            j = 5;
+                            break;
+                        }
+                    }
+                    if(j >= 5){
+                        break;
+                    }
+                }
+            }
+        }
     }
 
 }

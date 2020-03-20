@@ -98,6 +98,9 @@ public class MapCanvasView extends View {
             }
         }
 
+//        //test
+//        map[4][15] = OBSTACLE;
+
         mapPaintSpace = new Paint();
         mapPaintSpace.setStyle(Paint.Style.FILL_AND_STROKE);
         mapPaintSpace.setColor(0xffcccccc);
@@ -148,7 +151,7 @@ public class MapCanvasView extends View {
 
         imageBitmaps = new Bitmap[15];
         for(int i=0; i<15; i++){
-            int resId = getResId("img_" + (i+1), R.drawable.class);
+            int resId = getResId("img_" + i, R.drawable.class);
             Drawable drawable = getResources().getDrawable(resId, null);
             imageBitmaps[i] = ((BitmapDrawable) drawable).getBitmap();
         }
@@ -399,6 +402,15 @@ public class MapCanvasView extends View {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public boolean hasImage(int x, int y){
+        for(int i=0; i<15; i++){
+            if(imagePos[i][0] == x && imagePos[i][1] == y){
+                return true;
+            }
+        }
+        return false;
     }
 
 }
