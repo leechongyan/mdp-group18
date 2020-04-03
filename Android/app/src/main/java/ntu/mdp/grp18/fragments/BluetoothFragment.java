@@ -35,7 +35,7 @@ import ntu.mdp.grp18.R;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-
+//change
 
 public class BluetoothFragment extends Fragment implements OnBluetoothServiceBoundListener{
 
